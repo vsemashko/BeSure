@@ -18,8 +18,11 @@ export class AppError extends Error {
 }
 
 export class ValidationError extends AppError {
-  constructor(message: string) {
+  public validationErrors?: Record<string, string[]>;
+
+  constructor(message: string, validationErrors?: Record<string, string[]>) {
     super(message, 400, 'VALIDATION_ERROR');
+    this.validationErrors = validationErrors;
   }
 }
 

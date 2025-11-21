@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from '../../utils/errors';
+import { AppError, ValidationError } from '../../utils/errors';
 import { sendError } from '../../utils/helpers';
 import logger from '../../utils/logger';
 import config from '../../config/constants';
@@ -13,14 +13,36 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ): Response => {
-  // Log error
-  logger.error('Error occurred:', {
-    error: err.message,
-    stack: err.stack,
-    path: req.path,
-    method: req.method,
-    ip: req.ip,
-  });
+  // Log error (but don't log validation errors at error level)
+  if (err instanceof ValidationError) {
+    logger.warn('Validation error:', {
+      error: err.message,
+      details: err.validationErrors,
+      path: req.path,
+      method: req.method,
+      ip: req.ip,
+    });
+  } else {
+    logger.error('Error occurred:', {
+      error: err.message,
+      stack: err.stack,
+      path: req.path,
+      method: req.method,
+      ip: req.ip,
+    });
+  }
+
+  // Handle validation errors with detailed messages
+  if (err instanceof ValidationError) {
+    return res.status(400).json({
+      success: false,
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: err.message,
+        details: err.validationErrors,
+      },
+    });
+  }
 
   // Handle known application errors
   if (err instanceof AppError) {

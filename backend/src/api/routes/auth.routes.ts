@@ -2,6 +2,8 @@ import { Router } from 'express';
 import authController from '../controllers/auth.controller';
 import { authenticate } from '../middleware/auth';
 import { authRateLimiter } from '../middleware/rateLimiter';
+import { validate } from '../middleware/validation';
+import { registerSchema, loginSchema } from '../schemas/auth.schemas';
 
 const router = Router();
 
@@ -12,13 +14,13 @@ router.use(authRateLimiter);
  * POST /api/v1/auth/register
  * Register a new user
  */
-router.post('/register', authController.register);
+router.post('/register', validate(registerSchema), authController.register);
 
 /**
  * POST /api/v1/auth/login
  * Login user
  */
-router.post('/login', authController.login);
+router.post('/login', validate(loginSchema), authController.login);
 
 /**
  * POST /api/v1/auth/logout

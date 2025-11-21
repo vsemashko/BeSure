@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import voteController from '../controllers/vote.controller';
 import { authenticate } from '../middleware/auth';
+import { validate } from '../middleware/validation';
+import { submitVoteSchema, getUserVotesSchema } from '../schemas/vote.schemas';
 
 const router = Router();
 
@@ -8,13 +10,13 @@ const router = Router();
  * POST /api/v1/votes
  * Cast a vote (requires authentication)
  */
-router.post('/', authenticate, voteController.castVote);
+router.post('/', authenticate, validate(submitVoteSchema), voteController.castVote);
 
 /**
  * GET /api/v1/votes/my
  * Get current user's voting history (requires authentication)
  */
-router.get('/my', authenticate, voteController.getMyVotes);
+router.get('/my', authenticate, validate(getUserVotesSchema), voteController.getMyVotes);
 
 /**
  * GET /api/v1/votes/question/:questionId
