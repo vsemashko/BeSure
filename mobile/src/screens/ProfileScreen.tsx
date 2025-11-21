@@ -12,28 +12,61 @@ import { Ionicons } from '@expo/vector-icons';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { useAuthStore } from '../store/authStore';
-import { questionApi } from '../api';
+import { questionApi, streakApi, challengeApi } from '../api';
 import { colors, typography, spacing } from '../theme';
 import type { Question } from '../types';
+import type { StreakInfo, DailyChallenges } from '../api/streaks';
 
 export function ProfileScreen() {
   const { user, logout } = useAuthStore();
   const [myQuestions, setMyQuestions] = useState<Question[]>([]);
+  const [streakInfo, setStreakInfo] = useState<StreakInfo | null>(null);
+  const [challenges, setChallenges] = useState<DailyChallenges | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadMyQuestions();
+    loadProfileData();
   }, []);
+
+  const loadProfileData = async () => {
+    try {
+      setIsLoading(true);
+      await Promise.all([
+        loadMyQuestions(),
+        loadStreak(),
+        loadChallenges(),
+      ]);
+    } catch (error) {
+      console.error('Failed to load profile data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const loadMyQuestions = async () => {
     try {
-      setIsLoading(true);
       const result = await questionApi.getMyQuestions({ limit: 10 });
       setMyQuestions(result.questions);
     } catch (error) {
       console.error('Failed to load questions:', error);
-    } finally {
-      setIsLoading(false);
+    }
+  };
+
+  const loadStreak = async () => {
+    try {
+      const info = await streakApi.getMyStreak();
+      setStreakInfo(info);
+    } catch (error) {
+      console.error('Failed to load streak:', error);
+    }
+  };
+
+  const loadChallenges = async () => {
+    try {
+      const todayChallenges = await challengeApi.getTodayChallenges();
+      setChallenges(todayChallenges);
+    } catch (error) {
+      console.error('Failed to load challenges:', error);
     }
   };
 
@@ -96,6 +129,87 @@ export function ProfileScreen() {
             color={colors.success}
           />
         </View>
+
+        {/* Streak Card */}
+        {streakInfo && (
+          <Card style={styles.streakCard}>
+            <View style={styles.streakHeader}>
+              <View style={styles.streakTitle}>
+                <Text style={styles.streakFireEmoji}>🔥</Text>
+                <Text style={styles.streakText}>Daily Streak</Text>
+              </View>
+              <View style={styles.streakMultiplier}>
+                <Text style={styles.multiplierText}>{streakInfo.multiplier}x</Text>
+              </View>
+            </View>
+
+            <View style={styles.streakStats}>
+              <View style={styles.streakStat}>
+                <Text style={styles.streakStatValue}>{streakInfo.currentStreak}</Text>
+                <Text style={styles.streakStatLabel}>Current Streak</Text>
+              </View>
+              <View style={styles.streakDivider} />
+              <View style={styles.streakStat}>
+                <Text style={styles.streakStatValue}>{streakInfo.longestStreak}</Text>
+                <Text style={styles.streakStatLabel}>Longest Streak</Text>
+              </View>
+            </View>
+
+            <Text style={styles.streakInfo}>
+              Vote daily to increase your multiplier! Keep your streak going to earn up to 2.5x bonus points.
+            </Text>
+          </Card>
+        )}
+
+        {/* Daily Challenges */}
+        {challenges && challenges.challenges.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Daily Challenges</Text>
+            {challenges.challenges.map((challenge) => (
+              <Card key={challenge.id} style={styles.challengeCard}>
+                <View style={styles.challengeHeader}>
+                  <View style={styles.challengeTitleContainer}>
+                    <Text style={styles.challengeTitle}>{challenge.title}</Text>
+                    <Text style={styles.challengeDescription}>{challenge.description}</Text>
+                  </View>
+                  <View style={[styles.challengeReward, challenge.completed && styles.challengeCompleted]}>
+                    <Ionicons
+                      name={challenge.completed ? "checkmark-circle" : "star"}
+                      size={16}
+                      color={challenge.completed ? colors.success : colors.warning}
+                    />
+                    <Text style={[styles.challengeRewardText, challenge.completed && styles.challengeCompletedText]}>
+                      +{challenge.reward}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.challengeProgress}>
+                  <View style={styles.progressBar}>
+                    <View
+                      style={[
+                        styles.progressFill,
+                        { width: `${Math.min((challenge.progress / challenge.target) * 100, 100)}%` }
+                      ]}
+                    />
+                  </View>
+                  <Text style={styles.progressText}>
+                    {challenge.progress} / {challenge.target}
+                  </Text>
+                </View>
+              </Card>
+            ))}
+
+            {challenges.completedCount > 0 && (
+              <View style={styles.challengesSummary}>
+                <Text style={styles.challengesSummaryText}>
+                  {challenges.completedCount} / {challenges.challenges.length} completed •
+                  +{challenges.totalReward} points earned today 🎉
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
 
         {/* My Questions */}
         <View style={styles.section}>
@@ -328,6 +442,151 @@ const styles = StyleSheet.create({
   },
   actions: {
     marginTop: spacing.lg,
+  },
+  // Streak styles
+  streakCard: {
+    marginBottom: spacing.lg,
+  },
+  streakHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  streakTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  streakFireEmoji: {
+    fontSize: 24,
+  },
+  streakText: {
+    fontSize: typography.fontSize.h2,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.textPrimary,
+  },
+  streakMultiplier: {
+    backgroundColor: colors.warning + '20',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: 16,
+  },
+  multiplierText: {
+    fontSize: typography.fontSize.body,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.warning,
+  },
+  streakStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: spacing.md,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.lightGray,
+    borderRadius: 12,
+  },
+  streakStat: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  streakStatValue: {
+    fontSize: typography.fontSize.display,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary,
+    marginBottom: spacing.xs,
+  },
+  streakStatLabel: {
+    fontSize: typography.fontSize.caption,
+    color: colors.textSecondary,
+  },
+  streakDivider: {
+    width: 1,
+    backgroundColor: colors.mediumGray,
+  },
+  streakInfo: {
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  // Challenge styles
+  challengeCard: {
+    marginBottom: spacing.md,
+  },
+  challengeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
+  challengeTitleContainer: {
+    flex: 1,
+    marginRight: spacing.md,
+  },
+  challengeTitle: {
+    fontSize: typography.fontSize.body,
+    fontWeight: typography.fontWeight.semiBold,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
+  },
+  challengeDescription: {
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.textSecondary,
+  },
+  challengeReward: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    backgroundColor: colors.warning + '15',
+    borderRadius: 12,
+    height: 28,
+  },
+  challengeCompleted: {
+    backgroundColor: colors.success + '15',
+  },
+  challengeRewardText: {
+    fontSize: typography.fontSize.bodySmall,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.warning,
+  },
+  challengeCompletedText: {
+    color: colors.success,
+  },
+  challengeProgress: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  progressBar: {
+    flex: 1,
+    height: 8,
+    backgroundColor: colors.lightGray,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: colors.primary,
+    borderRadius: 4,
+  },
+  progressText: {
+    fontSize: typography.fontSize.caption,
+    color: colors.textSecondary,
+    minWidth: 50,
+    textAlign: 'right',
+  },
+  challengesSummary: {
+    marginTop: spacing.sm,
+    padding: spacing.md,
+    backgroundColor: colors.success + '10',
+    borderRadius: 12,
+  },
+  challengesSummaryText: {
+    fontSize: typography.fontSize.bodySmall,
+    fontWeight: typography.fontWeight.semiBold,
+    color: colors.success,
+    textAlign: 'center',
   },
 });
 
