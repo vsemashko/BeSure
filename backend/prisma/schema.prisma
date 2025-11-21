@@ -1,0 +1,233 @@
+// BeSure Database Schema
+// Based on PRD-TechStack.md specifications
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER MANAGEMENT
+// ============================================
+
+model User {
+  id            String   @id @default(uuid())
+  username      String   @unique @db.VarChar(50)
+  email         String   @unique @db.VarChar(255)
+  passwordHash  String   @db.VarChar(255)
+  points        Int      @default(10) // Starting balance
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  profileData   Json?    // Avatar URL, bio, etc.
+  preferences   Json?    // Settings, notifications, etc.
+
+  // Relations
+  questions          Question[]
+  votes              Vote[]
+  pointTransactions  PointTransaction[]
+  pointStats         UserPointStats?
+  interests          UserInterest[]
+  badges             UserBadge[]
+  challenges         UserChallenge[]
+  topicExpertise     UserTopicExpertise[]
+
+  @@map("users")
+}
+
+// ============================================
+// QUESTIONS & OPTIONS
+// ============================================
+
+model Question {
+  id            String   @id @default(uuid())
+  userId        String
+  title         String   @db.VarChar(500)
+  description   String?  @db.Text
+  isAnonymous   Boolean  @default(false)
+  privacyLevel  String   @default("public") @db.VarChar(20) // public, friends
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+  status        String   @default("active") @db.VarChar(20) // active, closed, deleted
+  metadata      Json?    // Cost paid, settings, etc.
+
+  // Relations
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  options QuestionOption[]
+  votes   Vote[]
+  topics  QuestionTopic[]
+
+  @@index([expiresAt])
+  @@index([status])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("questions")
+}
+
+model QuestionOption {
+  id         String   @id @default(uuid())
+  questionId String
+  content    String   @db.Text
+  imageUrl   String?  @db.VarChar(500)
+  orderIndex Int
+  createdAt  DateTime @default(now())
+
+  // Relations
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  votes    Vote[]
+
+  @@index([questionId])
+  @@map("question_options")
+}
+
+// ============================================
+// VOTING
+// ============================================
+
+model Vote {
+  id         String   @id @default(uuid())
+  questionId String
+  userId     String
+  optionId   String
+  createdAt  DateTime @default(now())
+
+  // Relations
+  question Question       @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  option   QuestionOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@unique([questionId, userId]) // One vote per user per question
+  @@index([questionId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("votes")
+}
+
+// ============================================
+// TOPICS & CATEGORIES
+// ============================================
+
+model Topic {
+  id          String   @id @default(uuid())
+  name        String   @unique @db.VarChar(100)
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  // Relations
+  questions      QuestionTopic[]
+  userInterests  UserInterest[]
+  userExpertise  UserTopicExpertise[]
+
+  @@map("topics")
+}
+
+model QuestionTopic {
+  questionId String
+  topicId    String
+  confidence Float? // AI confidence score (0-1)
+
+  // Relations
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  topic    Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([questionId, topicId])
+  @@map("question_topics")
+}
+
+model UserInterest {
+  userId        String
+  topicId       String
+  interestScore Float  @default(0.5) // 0-1 scale
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([userId, topicId])
+  @@map("user_interests")
+}
+
+// ============================================
+// POINT SYSTEM
+// ============================================
+
+model PointTransaction {
+  id          String   @id @default(uuid())
+  userId      String
+  amount      Int      // Positive for earning, negative for spending
+  type        String   @db.VarChar(50) // vote, question_create, question_complete, bonus, etc.
+  referenceId String? // ID of related question, vote, etc.
+  metadata    Json?    // Additional context
+  createdAt   DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("point_transactions")
+}
+
+model UserPointStats {
+  userId          String   @id
+  currentBalance  Int      @default(10)
+  lifetimeEarned  Int      @default(0)
+  lifetimeSpent   Int      @default(0)
+  level           Int      @default(1)
+  streakDays      Int      @default(0)
+  streakLastDate  DateTime?
+  lastVoteDate    DateTime?
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_point_stats")
+}
+
+model UserTopicExpertise {
+  userId         String
+  topicId        String
+  voteCount      Int     @default(0)
+  expertiseLevel String? @db.VarChar(20) // interested, knowledgeable, expert, master
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([userId, topicId])
+  @@map("user_topic_expertise")
+}
+
+// ============================================
+// GAMIFICATION
+// ============================================
+
+model UserBadge {
+  userId     String
+  badgeType  String   @db.VarChar(50) // first_vote, streak_7, expert_fashion, etc.
+  earnedAt   DateTime @default(now())
+  metadata   Json?    // Badge-specific data
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, badgeType])
+  @@map("user_badges")
+}
+
+model UserChallenge {
+  userId        String
+  challengeDate DateTime @db.Date
+  challenges    Json     // Array of challenge definitions
+  completed     Json     // Array of completed challenge IDs
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, challengeDate])
+  @@map("user_challenges")
+}
