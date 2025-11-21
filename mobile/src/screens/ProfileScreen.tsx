@@ -12,16 +12,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { useAuthStore } from '../store/authStore';
-import { questionApi, streakApi, challengeApi } from '../api';
+import { questionApi, streakApi, challengeApi, topicApi } from '../api';
 import { colors, typography, spacing } from '../theme';
 import type { Question } from '../types';
 import type { StreakInfo, DailyChallenges } from '../api/streaks';
+import type { UserTopicProfile } from '../api/topics';
 
 export function ProfileScreen() {
   const { user, logout } = useAuthStore();
   const [myQuestions, setMyQuestions] = useState<Question[]>([]);
   const [streakInfo, setStreakInfo] = useState<StreakInfo | null>(null);
   const [challenges, setChallenges] = useState<DailyChallenges | null>(null);
+  const [topicExpertise, setTopicExpertise] = useState<UserTopicProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -35,6 +37,7 @@ export function ProfileScreen() {
         loadMyQuestions(),
         loadStreak(),
         loadChallenges(),
+        loadTopicExpertise(),
       ]);
     } catch (error) {
       console.error('Failed to load profile data:', error);
@@ -67,6 +70,15 @@ export function ProfileScreen() {
       setChallenges(todayChallenges);
     } catch (error) {
       console.error('Failed to load challenges:', error);
+    }
+  };
+
+  const loadTopicExpertise = async () => {
+    try {
+      const profile = await topicApi.getMyExpertise();
+      setTopicExpertise(profile);
+    } catch (error) {
+      console.error('Failed to load topic expertise:', error);
     }
   };
 
@@ -211,6 +223,35 @@ export function ProfileScreen() {
           </View>
         )}
 
+        {/* Topic Expertise */}
+        {topicExpertise && topicExpertise.topExpertise.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Your Expertise</Text>
+            <Card style={styles.expertiseCard}>
+              {topicExpertise.topExpertise.map((expertise, index) => (
+                <View key={expertise.topicId} style={styles.expertiseRow}>
+                  <View style={styles.expertiseLeft}>
+                    <Text style={styles.expertiseEmoji}>
+                      {getTopicEmoji(expertise.topicName)}
+                    </Text>
+                    <View style={styles.expertiseInfo}>
+                      <Text style={styles.expertiseTopic}>{expertise.topicName}</Text>
+                      <Text style={styles.expertiseLevel}>{expertise.expertiseLevel}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.expertiseRight}>
+                    <Text style={styles.expertiseVotes}>{expertise.voteCount}</Text>
+                    <Text style={styles.expertiseVotesLabel}>votes</Text>
+                  </View>
+                </View>
+              ))}
+            </Card>
+            <Text style={styles.expertiseHint}>
+              Keep voting on topics to level up your expertise! Earn badges as you progress.
+            </Text>
+          </View>
+        )}
+
         {/* My Questions */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>My Questions</Text>
@@ -258,6 +299,21 @@ export function ProfileScreen() {
       </ScrollView>
     </SafeAreaView>
   );
+}
+
+function getTopicEmoji(topicName: string): string {
+  const emojiMap: Record<string, string> = {
+    fashion: '👗',
+    food: '🍕',
+    travel: '✈️',
+    tech: '💻',
+    career: '💼',
+    relationships: '💕',
+    entertainment: '🎬',
+    health: '💪',
+    finance: '💰',
+  };
+  return emojiMap[topicName.toLowerCase()] || '📌';
 }
 
 function StatsCard({
@@ -587,6 +643,63 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.semiBold,
     color: colors.success,
     textAlign: 'center',
+  },
+  // Topic expertise styles
+  expertiseCard: {
+    padding: 0,
+  },
+  expertiseRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.lightGray,
+  },
+  expertiseLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    flex: 1,
+  },
+  expertiseEmoji: {
+    fontSize: 28,
+  },
+  expertiseInfo: {
+    flex: 1,
+  },
+  expertiseTopic: {
+    fontSize: typography.fontSize.body,
+    fontWeight: typography.fontWeight.semiBold,
+    color: colors.textPrimary,
+    textTransform: 'capitalize',
+    marginBottom: 2,
+  },
+  expertiseLevel: {
+    fontSize: typography.fontSize.caption,
+    color: colors.primary,
+    textTransform: 'capitalize',
+    fontWeight: typography.fontWeight.semiBold,
+  },
+  expertiseRight: {
+    alignItems: 'flex-end',
+  },
+  expertiseVotes: {
+    fontSize: typography.fontSize.h2,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.textPrimary,
+  },
+  expertiseVotesLabel: {
+    fontSize: typography.fontSize.caption,
+    color: colors.textSecondary,
+  },
+  expertiseHint: {
+    marginTop: spacing.sm,
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });
 
