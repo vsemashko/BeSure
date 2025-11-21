@@ -34,8 +34,26 @@ model User {
   badges             UserBadge[]
   challenges         UserChallenge[]
   topicExpertise     UserTopicExpertise[]
+  following          UserFollow[]       @relation("UserFollowing")
+  followers          UserFollow[]       @relation("UserFollowers")
 
   @@map("users")
+}
+
+// User follow relationships
+model UserFollow {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  // Relations
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@map("user_follows")
 }
 
 // ============================================

@@ -6,6 +6,8 @@ import streakRoutes from './streak.routes';
 import challengeRoutes from './challenge.routes';
 import topicRoutes from './topic.routes';
 import notificationRoutes from './notification.routes';
+import socialRoutes from './social.routes';
+import leaderboardRoutes from './leaderboard.routes';
 
 const router = Router();
 
@@ -29,6 +31,8 @@ router.use('/streaks', streakRoutes);
 router.use('/challenges', challengeRoutes);
 router.use('/topics', topicRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/social', socialRoutes);
+router.use('/leaderboard', leaderboardRoutes);
 
 // Future routes:
 // router.use('/users', userRoutes);
