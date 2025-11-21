@@ -11,7 +11,7 @@ export const errorHandler = (
   err: Error | AppError,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): Response => {
   // Log error (but don't log validation errors at error level)
   if (err instanceof ValidationError) {

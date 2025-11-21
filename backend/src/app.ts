@@ -6,7 +6,6 @@ import config from './config/constants';
 import routes from './api/routes';
 import { errorHandler, notFoundHandler } from './api/middleware/errorHandler';
 import { apiRateLimiter } from './api/middleware/rateLimiter';
-import logger from './utils/logger';
 
 /**
  * Create and configure Express application
@@ -48,7 +47,7 @@ const createApp = (): Application => {
   // ============================================
 
   // Root endpoint
-  app.get('/', (req, res) => {
+  app.get('/', (_req, res) => {
     res.json({
       success: true,
       data: {

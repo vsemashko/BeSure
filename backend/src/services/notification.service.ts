@@ -50,7 +50,7 @@ class NotificationService {
   /**
    * Remove user's push token
    */
-  async removePushToken(userId: string, token: string): Promise<void> {
+  async removePushToken(userId: string, _token: string): Promise<void> {
     await prisma.user.update({
       where: { id: userId },
       data: {

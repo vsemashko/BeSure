@@ -7,16 +7,17 @@ class NotificationController {
    * POST /api/v1/notifications/token
    * Save user's push notification token
    */
-  async savePushToken(req: Request, res: Response, next: NextFunction) {
+  async savePushToken(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.id;
       const { token, platform } = req.body;
 
       if (!token) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           error: 'Token is required',
         });
+        return;
       }
 
       await notificationService.savePushToken(userId, token, platform || 'unknown');
@@ -36,7 +37,7 @@ class NotificationController {
    * DELETE /api/v1/notifications/token
    * Remove user's push notification token
    */
-  async removePushToken(req: Request, res: Response, next: NextFunction) {
+  async removePushToken(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.id;
       const { token } = req.body;
@@ -58,7 +59,7 @@ class NotificationController {
    * GET /api/v1/notifications/preferences
    * Get user's notification preferences
    */
-  async getPreferences(req: Request, res: Response, next: NextFunction) {
+  async getPreferences(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.id;
 
@@ -77,7 +78,7 @@ class NotificationController {
    * PUT /api/v1/notifications/preferences
    * Update user's notification preferences
    */
-  async updatePreferences(req: Request, res: Response, next: NextFunction) {
+  async updatePreferences(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.id;
       const preferences = req.body;

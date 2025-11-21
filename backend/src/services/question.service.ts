@@ -173,7 +173,7 @@ class QuestionService {
     }));
 
     // Check if user has voted
-    const hasVoted = userId && (question.votes as any[]).length > 0;
+    const hasVoted = Boolean(userId && (question.votes as any[]).length > 0);
     const userVote = hasVoted ? (question.votes as any[])[0].optionId : undefined;
 
     return {

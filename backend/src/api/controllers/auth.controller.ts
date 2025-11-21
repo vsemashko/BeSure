@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import authService from '../../services/auth.service';
 import { sendSuccess } from '../../utils/helpers';
 import { asyncHandler } from '../middleware/errorHandler';
@@ -38,7 +38,7 @@ class AuthController {
    * POST /api/v1/auth/logout
    * Logout user (client-side only, just removes token)
    */
-  logout = asyncHandler(async (req: Request, res: Response) => {
+  logout = asyncHandler(async (_req: Request, res: Response) => {
     return sendSuccess(res, { message: 'Logged out successfully' });
   });
 }

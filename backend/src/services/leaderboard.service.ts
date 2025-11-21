@@ -1,5 +1,4 @@
 import prisma from '../config/database';
-import logger from '../utils/logger';
 
 interface LeaderboardEntry {
   rank: number;
@@ -261,7 +260,7 @@ class LeaderboardService {
       select: { followingId: true },
     });
 
-    const friendIds = [...following.map((f) => f.followingId), userId]; // Include self
+    const friendIds = [...following.map((f: { followingId: string }) => f.followingId), userId]; // Include self
 
     if (friendIds.length === 0) {
       return {

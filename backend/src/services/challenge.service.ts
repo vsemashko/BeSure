@@ -1,6 +1,5 @@
 import prisma from '../config/database';
 import pointsService from './points.service';
-import { NotFoundError } from '../utils/errors';
 import logger from '../utils/logger';
 
 export interface Challenge {
@@ -123,7 +122,7 @@ class ChallengeService {
         data: {
           userId,
           challengeDate: todayDate,
-          challenges: newChallenges,
+          challenges: newChallenges as any,
           completed: [],
         },
       });

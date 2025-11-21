@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import prisma from '../config/database';
 import config from '../config/constants';
 import { ValidationError, AuthenticationError, ConflictError } from '../utils/errors';
@@ -169,11 +169,11 @@ class AuthService {
 
     const token = jwt.sign(payload, config.jwtSecret, {
       expiresIn: config.jwtExpiresIn,
-    });
+    } as SignOptions);
 
     const refreshToken = jwt.sign(payload, config.jwtSecret, {
       expiresIn: config.jwtRefreshExpiresIn,
-    });
+    } as SignOptions);
 
     return { token, refreshToken };
   }

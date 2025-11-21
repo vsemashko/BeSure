@@ -135,7 +135,7 @@ class SocialController {
    * GET /api/v1/social/search
    * Search users by username
    */
-  async searchUsers(req: Request, res: Response, next: NextFunction) {
+  async searchUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const query = req.query.q as string;
       const limit = parseInt(req.query.limit as string) || 20;
@@ -143,10 +143,11 @@ class SocialController {
       const viewerId = req.user?.id;
 
       if (!query || query.trim().length < 2) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           error: 'Search query must be at least 2 characters',
         });
+        return;
       }
 
       const result = await socialService.searchUsers(query, {

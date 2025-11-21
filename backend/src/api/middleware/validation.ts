@@ -11,14 +11,14 @@ export const validate = (schema: {
   query?: Joi.ObjectSchema;
   params?: Joi.ObjectSchema;
 }) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return (req: Request, _res: Response, next: NextFunction): void => {
     const validationErrors: Record<string, string[]> = {};
 
     // Validate body
     if (schema.body) {
       const { error } = schema.body.validate(req.body, { abortEarly: false });
       if (error) {
-        validationErrors.body = error.details.map((detail) => detail.message);
+        validationErrors.body = error.details.map((detail: Joi.ValidationErrorItem) => detail.message);
       }
     }
 
@@ -26,7 +26,7 @@ export const validate = (schema: {
     if (schema.query) {
       const { error } = schema.query.validate(req.query, { abortEarly: false });
       if (error) {
-        validationErrors.query = error.details.map((detail) => detail.message);
+        validationErrors.query = error.details.map((detail: Joi.ValidationErrorItem) => detail.message);
       }
     }
 
@@ -34,7 +34,7 @@ export const validate = (schema: {
     if (schema.params) {
       const { error } = schema.params.validate(req.params, { abortEarly: false });
       if (error) {
-        validationErrors.params = error.details.map((detail) => detail.message);
+        validationErrors.params = error.details.map((detail: Joi.ValidationErrorItem) => detail.message);
       }
     }
 

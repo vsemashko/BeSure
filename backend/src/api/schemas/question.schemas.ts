@@ -47,9 +47,9 @@ export const createQuestionSchema = {
       .messages({
         'any.only': 'Difficulty must be one of: EASY, MEDIUM, HARD',
       }),
-  }).custom((value, helpers) => {
+  }).custom((value: { options: Array<{ text: string; isCorrect: boolean }> }, helpers: Joi.CustomHelpers) => {
     // Custom validation: At least one option must be correct
-    const hasCorrectOption = value.options.some((opt: any) => opt.isCorrect === true);
+    const hasCorrectOption = value.options.some((opt) => opt.isCorrect === true);
     if (!hasCorrectOption) {
       return helpers.error('options.noCorrect');
     }

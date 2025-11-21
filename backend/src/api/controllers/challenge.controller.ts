@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import challengeService from '../../services/challenge.service';
-import logger from '../../utils/logger';
 
 class ChallengeController {
   /**
