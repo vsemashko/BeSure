@@ -14,6 +14,7 @@ import { Card } from '../components/Card';
 import { useAuthStore } from '../store/authStore';
 import { questionApi, streakApi, challengeApi, topicApi } from '../api';
 import { colors, typography, spacing } from '../theme';
+import logger from '../utils/logger';
 import type { Question } from '../types';
 import type { StreakInfo } from '../api/streaks';
 import type { DailyChallenges, Challenge } from '../api/challenges';
@@ -41,7 +42,7 @@ export function ProfileScreen() {
         loadTopicExpertise(),
       ]);
     } catch (error) {
-      console.error('Failed to load profile data:', error);
+      logger.error('Failed to load profile data', error);
     } finally {
       setIsLoading(false);
     }
@@ -52,7 +53,7 @@ export function ProfileScreen() {
       const result = await questionApi.getMyQuestions({ limit: 10 });
       setMyQuestions(result.questions);
     } catch (error) {
-      console.error('Failed to load questions:', error);
+      logger.error('Failed to load questions', error);
     }
   };
 
@@ -61,7 +62,7 @@ export function ProfileScreen() {
       const info = await streakApi.getMyStreak();
       setStreakInfo(info);
     } catch (error) {
-      console.error('Failed to load streak:', error);
+      logger.error('Failed to load streak', error);
     }
   };
 
@@ -70,7 +71,7 @@ export function ProfileScreen() {
       const todayChallenges = await challengeApi.getTodayChallenges();
       setChallenges(todayChallenges);
     } catch (error) {
-      console.error('Failed to load challenges:', error);
+      logger.error('Failed to load challenges', error);
     }
   };
 
@@ -79,7 +80,7 @@ export function ProfileScreen() {
       const profile = await topicApi.getMyExpertise();
       setTopicExpertise(profile);
     } catch (error) {
-      console.error('Failed to load topic expertise:', error);
+      logger.error('Failed to load topic expertise', error);
     }
   };
 

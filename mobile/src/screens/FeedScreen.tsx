@@ -15,6 +15,7 @@ import { QuestionCard } from '../components/QuestionCard';
 import { useAuthStore } from '../store/authStore';
 import { questionApi } from '../api';
 import { colors, typography, spacing } from '../theme';
+import logger from '../utils/logger';
 import type { Question, FeedMode } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -63,7 +64,7 @@ export function FeedScreen() {
         setOffset((prev) => prev + result.questions.length);
       }
     } catch (error) {
-      console.error('Failed to load feed:', error);
+      logger.error('Failed to load feed', error);
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);

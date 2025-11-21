@@ -1,10 +1,24 @@
 # Claude Development Guidelines for BeSure Project
 
-## ⚠️ PRE-COMMIT CHECKLIST (MANDATORY)
+## 🚨 CRITICAL: PRE-COMMIT CHECKLIST (MANDATORY)
 
-Before committing ANY changes to this repository, you MUST complete ALL of the following checks:
+⚠️ **STOP!** Before committing, you MUST:
+1. ✅ Run **ALL** linting, formatting, type-check, and test commands
+2. ✅ Fix **ALL ERRORS** (zero errors allowed - warnings are acceptable)
+3. ✅ Verify **ALL CHECKS PASS** before creating commit
 
-### 1. Code Quality Checks
+**CI/CD will REJECT commits with:**
+- ❌ Any linting errors
+- ❌ Any TypeScript compilation errors
+- ❌ Any test failures
+- ❌ Any security scan errors (secrets, credentials)
+- ❌ Any build failures
+
+**NO EXCEPTIONS - Fix errors first, then commit!**
+
+---
+
+### 1. Code Quality Checks (MANDATORY)
 
 #### Backend (Node.js/TypeScript)
 ```bash

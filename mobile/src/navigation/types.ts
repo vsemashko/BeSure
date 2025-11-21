@@ -24,8 +24,7 @@ export type MainTabParamList = {
   Profile: undefined;
 };
 
-declare global {
-  namespace ReactNavigation {
-    interface RootParamList extends RootStackParamList {}
-  }
+// Augment @react-navigation types for type-safe navigation
+declare module '@react-navigation/native' {
+  export function useNavigation<T = RootStackParamList>(): any;
 }
