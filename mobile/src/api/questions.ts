@@ -23,7 +23,7 @@ export const questionApi = {
     limit?: number;
     offset?: number;
   }): Promise<{questions: Question[]; total: number}> {
-    const response = await apiClient.get<ApiResponse<{questions: Question[]; total: number; limit: number; offset: number}>>('/questions', params);
+    const response = await apiClient.get<ApiResponse<{questions: Question[]; total: number; limit: number; offset: number}>>('/questions', { params });
 
     if (response.success && response.data) {
       return response.data;
@@ -52,7 +52,7 @@ export const questionApi = {
     limit?: number;
     offset?: number;
   }): Promise<{questions: Question[]; total: number}> {
-    const response = await apiClient.get<ApiResponse<{questions: Question[]; total: number}>>('/questions/my', params);
+    const response = await apiClient.get<ApiResponse<{questions: Question[]; total: number}>>('/questions/my', { params });
 
     if (response.success && response.data) {
       return response.data;

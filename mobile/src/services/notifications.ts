@@ -1,7 +1,10 @@
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import { apiClient } from '../api';
+import { NOTIFICATION_CHANNEL_ID, NOTIFICATION_VIBRATION_PATTERN } from '../constants';
+import logger from '../utils/logger';
 
 // Configure notification behavior
 Notifications.setNotificationHandler({
@@ -31,7 +34,7 @@ class NotificationService {
    */
   async registerForPushNotifications(): Promise<string | null> {
     if (!Device.isDevice) {
-      console.log('Push notifications only work on physical devices');
+      logger.warn('Push notifications only work on physical devices');
       return null;
     }
 
@@ -46,27 +49,35 @@ class NotificationService {
     }
 
     if (finalStatus !== 'granted') {
-      console.log('Failed to get push token for push notification');
+      logger.warn('Failed to get push token - permission not granted');
+      return null;
+    }
+
+    // Get Expo project ID from environment
+    const expoProjectId = Constants.expoConfig?.extra?.expoProjectId;
+    if (!expoProjectId) {
+      logger.error('Expo project ID not configured in environment');
       return null;
     }
 
     // Get push token
     const token = await Notifications.getExpoPushTokenAsync({
-      projectId: 'your-project-id', // TODO: Replace with actual Expo project ID
+      projectId: expoProjectId,
     });
 
     this.expoPushToken = token.data;
 
     // Android specific channel
     if (Platform.OS === 'android') {
-      Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
+      Notifications.setNotificationChannelAsync(NOTIFICATION_CHANNEL_ID, {
+        name: NOTIFICATION_CHANNEL_ID,
         importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
+        vibrationPattern: NOTIFICATION_VIBRATION_PATTERN,
         lightColor: '#4A90E2',
       });
     }
 
+    logger.info('Push notification token registered successfully');
     return token.data;
   }
 
@@ -79,9 +90,9 @@ class NotificationService {
         token,
         platform: Platform.OS,
       });
-      console.log('Push token saved successfully');
+      logger.info('Push token saved successfully');
     } catch (error) {
-      console.error('Failed to save push token:', error);
+      logger.error('Failed to save push token', error);
     }
   }
 
@@ -96,9 +107,9 @@ class NotificationService {
         data: { token: this.expoPushToken },
       });
       this.expoPushToken = null;
-      console.log('Push token removed successfully');
+      logger.info('Push token removed successfully');
     } catch (error) {
-      console.error('Failed to remove push token:', error);
+      logger.error('Failed to remove push token', error);
     }
   }
 
@@ -110,9 +121,9 @@ class NotificationService {
   ): Promise<void> {
     try {
       await apiClient.put('/notifications/preferences', preferences);
-      console.log('Notification preferences updated');
+      logger.info('Notification preferences updated');
     } catch (error) {
-      console.error('Failed to update preferences:', error);
+      logger.error('Failed to update preferences', error);
     }
   }
 
@@ -124,7 +135,7 @@ class NotificationService {
       const response = await apiClient.get<{ data: NotificationPreferences }>('/notifications/preferences');
       return response.data;
     } catch (error) {
-      console.error('Failed to get preferences:', error);
+      logger.error('Failed to get preferences', error);
       return {
         enabled: true,
         streakReminders: true,

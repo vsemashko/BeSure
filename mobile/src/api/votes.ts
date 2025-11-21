@@ -22,7 +22,7 @@ export const voteApi = {
     limit?: number;
     offset?: number;
   }): Promise<{votes: Vote[]; total: number}> {
-    const response = await apiClient.get<ApiResponse<{votes: Vote[]; total: number}>>('/votes/my', params);
+    const response = await apiClient.get<ApiResponse<{votes: Vote[]; total: number}>>('/votes/my', { params });
 
     if (response.success && response.data) {
       return response.data;
