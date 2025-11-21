@@ -16,14 +16,16 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.besure.app"
+      "bundleIdentifier": "com.besure.app",
+      "newArchEnabled": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#4A90E2"
       },
-      "package": "com.besure.app"
+      "package": "com.besure.app",
+      "newArchEnabled": true
     },
     "web": {
       "favicon": "./assets/favicon.png"

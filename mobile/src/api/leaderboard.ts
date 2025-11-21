@@ -28,10 +28,10 @@ class LeaderboardApi {
     offset?: number;
   } = {}): Promise<LeaderboardResult> {
     const { limit = 50, offset = 0 } = options;
-    const response = await apiClient.get('/leaderboard/points', {
+    const response = await apiClient.get<{ data: LeaderboardResult }>('/leaderboard/points', {
       params: { limit, offset },
     });
-    return response.data.data;
+    return response.data;
   }
 
   /**
@@ -42,10 +42,10 @@ class LeaderboardApi {
     offset?: number;
   } = {}): Promise<LeaderboardResult> {
     const { limit = 50, offset = 0 } = options;
-    const response = await apiClient.get('/leaderboard/streak', {
+    const response = await apiClient.get<{ data: LeaderboardResult }>('/leaderboard/streak', {
       params: { limit, offset },
     });
-    return response.data.data;
+    return response.data;
   }
 
   /**
@@ -56,10 +56,10 @@ class LeaderboardApi {
     offset?: number;
   } = {}): Promise<LeaderboardResult> {
     const { limit = 50, offset = 0 } = options;
-    const response = await apiClient.get('/leaderboard/questions', {
+    const response = await apiClient.get<{ data: LeaderboardResult }>('/leaderboard/questions', {
       params: { limit, offset },
     });
-    return response.data.data;
+    return response.data;
   }
 
   /**
@@ -70,10 +70,10 @@ class LeaderboardApi {
     offset?: number;
   } = {}): Promise<LeaderboardResult> {
     const { limit = 50, offset = 0 } = options;
-    const response = await apiClient.get('/leaderboard/votes', {
+    const response = await apiClient.get<{ data: LeaderboardResult }>('/leaderboard/votes', {
       params: { limit, offset },
     });
-    return response.data.data;
+    return response.data;
   }
 
   /**
@@ -83,10 +83,10 @@ class LeaderboardApi {
     type: LeaderboardType,
     limit: number = 50
   ): Promise<LeaderboardResult> {
-    const response = await apiClient.get(`/leaderboard/friends/${type}`, {
+    const response = await apiClient.get<{ data: LeaderboardResult }>(`/leaderboard/friends/${type}`, {
       params: { limit },
     });
-    return response.data.data;
+    return response.data;
   }
 }
 

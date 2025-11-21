@@ -29,24 +29,24 @@ class StreakApi {
    * Get current user's streak information
    */
   async getMyStreak(): Promise<StreakInfo> {
-    const response = await apiClient.get('/streaks/my');
-    return response.data.data;
+    const response = await apiClient.get<{ data: StreakInfo }>('/streaks/my');
+    return response.data;
   }
 
   /**
    * Use streak freeze to save a broken streak
    */
   async useFreeze(): Promise<{ freezeUsed: boolean; message: string }> {
-    const response = await apiClient.post('/streaks/freeze');
-    return response.data.data;
+    const response = await apiClient.post<{ data: { freezeUsed: boolean; message: string } }>('/streaks/freeze');
+    return response.data;
   }
 
   /**
    * Get current user's streak badges
    */
   async getMyBadges(): Promise<{ badges: StreakBadge[]; count: number }> {
-    const response = await apiClient.get('/streaks/badges');
-    return response.data.data;
+    const response = await apiClient.get<{ data: { badges: StreakBadge[]; count: number } }>('/streaks/badges');
+    return response.data;
   }
 
   /**
@@ -56,10 +56,15 @@ class StreakApi {
     leaderboard: LeaderboardEntry[];
     total: number;
   }> {
-    const response = await apiClient.get('/streaks/leaderboard', {
+    const response = await apiClient.get<{
+      data: {
+        leaderboard: LeaderboardEntry[];
+        total: number;
+      };
+    }>('/streaks/leaderboard', {
       params: { limit },
     });
-    return response.data.data;
+    return response.data;
   }
 }
 

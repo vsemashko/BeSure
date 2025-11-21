@@ -15,7 +15,8 @@ import { useAuthStore } from '../store/authStore';
 import { questionApi, streakApi, challengeApi, topicApi } from '../api';
 import { colors, typography, spacing } from '../theme';
 import type { Question } from '../types';
-import type { StreakInfo, DailyChallenges } from '../api/streaks';
+import type { StreakInfo } from '../api/streaks';
+import type { DailyChallenges, Challenge } from '../api/challenges';
 import type { UserTopicProfile } from '../api/topics';
 
 export function ProfileScreen() {
@@ -177,7 +178,7 @@ export function ProfileScreen() {
         {challenges && challenges.challenges.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Daily Challenges</Text>
-            {challenges.challenges.map((challenge) => (
+            {challenges.challenges.map((challenge: Challenge) => (
               <Card key={challenge.id} style={styles.challengeCard}>
                 <View style={styles.challengeHeader}>
                   <View style={styles.challengeTitleContainer}>
@@ -470,6 +471,9 @@ const styles = StyleSheet.create({
   },
   statusclosed: {
     backgroundColor: colors.mediumGray + '20',
+  },
+  statusdeleted: {
+    backgroundColor: colors.error + '20',
   },
   statusText: {
     fontSize: typography.fontSize.caption,

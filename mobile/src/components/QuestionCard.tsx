@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { formatDistanceToNow } from 'date-fns';
 import { Card } from './Card';
-import { colors, typography, spacing } from '../theme';
+import { colors, typography, spacing, borderRadius } from '../theme';
 import type { Question } from '../types';
 
 interface QuestionCardProps {

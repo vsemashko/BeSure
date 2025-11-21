@@ -17,7 +17,7 @@ import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { questionApi, voteApi } from '../api';
 import { useAuthStore } from '../store/authStore';
-import { colors, typography, spacing, optionColors } from '../theme';
+import { colors, typography, spacing, optionColors, borderRadius } from '../theme';
 import type { Question } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 

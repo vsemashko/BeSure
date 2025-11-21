@@ -38,8 +38,8 @@ class ChallengeApi {
    * Get today's challenges for current user
    */
   async getTodayChallenges(): Promise<DailyChallenges> {
-    const response = await apiClient.get('/challenges/today');
-    return response.data.data;
+    const response = await apiClient.get<{ data: DailyChallenges }>('/challenges/today');
+    return response.data;
   }
 
   /**
@@ -55,18 +55,25 @@ class ChallengeApi {
     offset: number;
   }> {
     const { limit = 30, offset = 0 } = options;
-    const response = await apiClient.get('/challenges/history', {
+    const response = await apiClient.get<{
+      data: {
+        history: ChallengeHistory[];
+        total: number;
+        limit: number;
+        offset: number;
+      };
+    }>('/challenges/history', {
       params: { limit, offset },
     });
-    return response.data.data;
+    return response.data;
   }
 
   /**
    * Get challenge statistics for current user
    */
   async getChallengeStats(): Promise<ChallengeStats> {
-    const response = await apiClient.get('/challenges/stats');
-    return response.data.data;
+    const response = await apiClient.get<{ data: ChallengeStats }>('/challenges/stats');
+    return response.data;
   }
 }
 

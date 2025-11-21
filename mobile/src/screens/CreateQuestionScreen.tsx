@@ -245,7 +245,7 @@ export function CreateQuestionScreen() {
             </View>
             {isUrgent && (
               <Text style={styles.urgentWarning}>
-                ⚡ Urgent questions (<6 hours) cost +5 points
+                ⚡ Urgent questions (&lt;6 hours) cost +5 points
               </Text>
             )}
           </View>

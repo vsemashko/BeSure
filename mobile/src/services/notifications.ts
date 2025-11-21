@@ -9,6 +9,8 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -119,8 +121,8 @@ class NotificationService {
    */
   async getPreferences(): Promise<NotificationPreferences> {
     try {
-      const response = await apiClient.get('/notifications/preferences');
-      return response.data.data;
+      const response = await apiClient.get<{ data: NotificationPreferences }>('/notifications/preferences');
+      return response.data;
     } catch (error) {
       console.error('Failed to get preferences:', error);
       return {

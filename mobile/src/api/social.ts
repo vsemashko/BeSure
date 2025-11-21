@@ -53,10 +53,17 @@ class SocialApi {
     offset: number;
   }> {
     const { limit = 50, offset = 0 } = options;
-    const response = await apiClient.get(`/social/followers/${userId}`, {
+    const response = await apiClient.get<{
+      data: {
+        followers: UserListItem[];
+        total: number;
+        limit: number;
+        offset: number;
+      };
+    }>(`/social/followers/${userId}`, {
       params: { limit, offset },
     });
-    return response.data.data;
+    return response.data;
   }
 
   /**
@@ -72,10 +79,17 @@ class SocialApi {
     offset: number;
   }> {
     const { limit = 50, offset = 0 } = options;
-    const response = await apiClient.get(`/social/following/${userId}`, {
+    const response = await apiClient.get<{
+      data: {
+        following: UserListItem[];
+        total: number;
+        limit: number;
+        offset: number;
+      };
+    }>(`/social/following/${userId}`, {
       params: { limit, offset },
     });
-    return response.data.data;
+    return response.data;
   }
 
   /**
@@ -88,18 +102,25 @@ class SocialApi {
     offset: number;
   }> {
     const { limit = 20, offset = 0 } = options;
-    const response = await apiClient.get('/social/feed/friends', {
+    const response = await apiClient.get<{
+      data: {
+        questions: any[];
+        total: number;
+        limit: number;
+        offset: number;
+      };
+    }>('/social/feed/friends', {
       params: { limit, offset },
     });
-    return response.data.data;
+    return response.data;
   }
 
   /**
    * Get user profile with stats
    */
   async getUserProfile(userId: string): Promise<UserProfile> {
-    const response = await apiClient.get(`/social/profile/${userId}`);
-    return response.data.data;
+    const response = await apiClient.get<{ data: UserProfile }>(`/social/profile/${userId}`);
+    return response.data;
   }
 
   /**
@@ -115,10 +136,17 @@ class SocialApi {
     offset: number;
   }> {
     const { limit = 20, offset = 0 } = options;
-    const response = await apiClient.get('/social/search', {
+    const response = await apiClient.get<{
+      data: {
+        users: UserListItem[];
+        total: number;
+        limit: number;
+        offset: number;
+      };
+    }>('/social/search', {
       params: { q: query, limit, offset },
     });
-    return response.data.data;
+    return response.data;
   }
 
   /**
@@ -128,10 +156,15 @@ class SocialApi {
     users: UserListItem[];
     total: number;
   }> {
-    const response = await apiClient.get('/social/suggestions', {
+    const response = await apiClient.get<{
+      data: {
+        users: UserListItem[];
+        total: number;
+      };
+    }>('/social/suggestions', {
       params: { limit },
     });
-    return response.data.data;
+    return response.data;
   }
 
   /**
@@ -144,10 +177,17 @@ class SocialApi {
     offset: number;
   }> {
     const { limit = 10, offset = 0 } = options;
-    const response = await apiClient.get('/social/popular', {
+    const response = await apiClient.get<{
+      data: {
+        users: UserListItem[];
+        total: number;
+        limit: number;
+        offset: number;
+      };
+    }>('/social/popular', {
       params: { limit, offset },
     });
-    return response.data.data;
+    return response.data;
   }
 }
 
