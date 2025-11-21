@@ -2,6 +2,7 @@ import prisma from '../config/database';
 import pointsService from './points.service';
 import streakService from './streak.service';
 import challengeService from './challenge.service';
+import topicService from './topic.service';
 import { ValidationError, NotFoundError, ConflictError } from '../utils/errors';
 import logger from '../utils/logger';
 
@@ -32,6 +33,7 @@ class VoteService {
       completed: any[];
       bonusPoints: number;
     };
+    topicExpertise: any[];
   }> {
     const { userId, questionId, optionId } = input;
 
@@ -65,10 +67,16 @@ class VoteService {
     // Update daily challenges
     const challengeUpdate = await challengeService.updateChallengeProgress(userId);
 
+    // Update topic expertise
+    const topicUpdate = await topicService.updateTopicExpertiseOnVote(userId, questionId);
+
     logger.info(
       `User ${userId} voted on question ${questionId} - Earned ${pointsResult.totalPoints} points (${streakUpdate.streakDays} day streak, ${streakUpdate.multiplier}x)` +
         (challengeUpdate.challengesCompleted.length > 0
           ? ` + ${challengeUpdate.totalReward} bonus from ${challengeUpdate.challengesCompleted.length} challenges`
+          : '') +
+        (topicUpdate.length > 0
+          ? ` - Expertise updated: ${topicUpdate.map((t) => t.topicName).join(', ')}`
           : '')
     );
 
@@ -89,6 +97,7 @@ class VoteService {
         completed: challengeUpdate.challengesCompleted,
         bonusPoints: challengeUpdate.totalReward,
       },
+      topicExpertise: topicUpdate,
     };
   }
 

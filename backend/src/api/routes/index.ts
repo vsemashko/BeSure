@@ -4,6 +4,7 @@ import questionRoutes from './question.routes';
 import voteRoutes from './vote.routes';
 import streakRoutes from './streak.routes';
 import challengeRoutes from './challenge.routes';
+import topicRoutes from './topic.routes';
 
 const router = Router();
 
@@ -25,9 +26,9 @@ router.use('/questions', questionRoutes);
 router.use('/votes', voteRoutes);
 router.use('/streaks', streakRoutes);
 router.use('/challenges', challengeRoutes);
+router.use('/topics', topicRoutes);
 
 // Future routes:
 // router.use('/users', userRoutes);
-// router.use('/topics', topicRoutes);
 
 export default router;

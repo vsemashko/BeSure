@@ -1,6 +1,7 @@
 import prisma from '../config/database';
 import config from '../config/constants';
 import pointsService from './points.service';
+import topicService from './topic.service';
 import {
   ValidationError,
   NotFoundError,
@@ -113,6 +114,10 @@ class QuestionService {
     logger.info(
       `Question created: ${question.id} by user ${input.userId} (cost: ${cost} points)`
     );
+
+    // Auto-tag question with topics
+    const questionText = `${input.title} ${input.description || ''}`;
+    await topicService.autoTagQuestion(question.id, questionText);
 
     return this.formatQuestion(question);
   }
