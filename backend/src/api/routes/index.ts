@@ -2,6 +2,8 @@ import { Router } from 'express';
 import authRoutes from './auth.routes';
 import questionRoutes from './question.routes';
 import voteRoutes from './vote.routes';
+import streakRoutes from './streak.routes';
+import challengeRoutes from './challenge.routes';
 
 const router = Router();
 
@@ -21,6 +23,8 @@ router.get('/health', (req, res) => {
 router.use('/auth', authRoutes);
 router.use('/questions', questionRoutes);
 router.use('/votes', voteRoutes);
+router.use('/streaks', streakRoutes);
+router.use('/challenges', challengeRoutes);
 
 // Future routes:
 // router.use('/users', userRoutes);

@@ -1,5 +1,7 @@
 import prisma from '../config/database';
 import pointsService from './points.service';
+import streakService from './streak.service';
+import challengeService from './challenge.service';
 import { ValidationError, NotFoundError, ConflictError } from '../utils/errors';
 import logger from '../utils/logger';
 
@@ -16,7 +18,20 @@ class VoteService {
   async castVote(input: CastVoteInput): Promise<{
     vote: any;
     pointsEarned: number;
+    basePoints: number;
+    bonusPoints: number;
     newBalance: number;
+    streak: {
+      currentStreak: number;
+      multiplier: number;
+      streakContinued: boolean;
+      newMilestone: boolean;
+      milestoneDay?: number;
+    };
+    challenges: {
+      completed: any[];
+      bonusPoints: number;
+    };
   }> {
     const { userId, questionId, optionId } = input;
 
@@ -34,18 +49,46 @@ class VoteService {
         },
       });
 
-      // Award points for voting
-      const newBalance = await pointsService.awardVotePoints(userId, questionId);
-
-      return { vote, newBalance };
+      return { vote };
     });
 
-    logger.info(`User ${userId} voted on question ${questionId}`);
+    // Update streak (outside transaction for better error handling)
+    const streakUpdate = await streakService.updateStreakOnVote(userId);
+
+    // Award points with streak multiplier
+    const pointsResult = await pointsService.awardVotePointsWithMultiplier(
+      userId,
+      questionId,
+      streakUpdate.multiplier
+    );
+
+    // Update daily challenges
+    const challengeUpdate = await challengeService.updateChallengeProgress(userId);
+
+    logger.info(
+      `User ${userId} voted on question ${questionId} - Earned ${pointsResult.totalPoints} points (${streakUpdate.streakDays} day streak, ${streakUpdate.multiplier}x)` +
+        (challengeUpdate.challengesCompleted.length > 0
+          ? ` + ${challengeUpdate.totalReward} bonus from ${challengeUpdate.challengesCompleted.length} challenges`
+          : '')
+    );
 
     return {
       vote: result.vote,
-      pointsEarned: 2, // From config
-      newBalance: result.newBalance,
+      pointsEarned: pointsResult.totalPoints,
+      basePoints: pointsResult.basePoints,
+      bonusPoints: pointsResult.bonusPoints,
+      newBalance: pointsResult.newBalance,
+      streak: {
+        currentStreak: streakUpdate.streakDays,
+        multiplier: streakUpdate.multiplier,
+        streakContinued: streakUpdate.streakContinued,
+        newMilestone: streakUpdate.newMilestone,
+        milestoneDay: streakUpdate.milestoneDay,
+      },
+      challenges: {
+        completed: challengeUpdate.challengesCompleted,
+        bonusPoints: challengeUpdate.totalReward,
+      },
     };
   }
 

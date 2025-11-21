@@ -145,6 +145,52 @@ class PointsService {
   }
 
   /**
+   * Award points for voting with streak multiplier
+   */
+  async awardVotePointsWithMultiplier(
+    userId: string,
+    questionId: string,
+    multiplier: number
+  ): Promise<{ basePoints: number; bonusPoints: number; totalPoints: number; newBalance: number }> {
+    const basePoints = config.points.voteReward; // 2 points
+    const bonusPoints = Math.floor(basePoints * (multiplier - 1)); // Bonus from streak
+    const totalPoints = basePoints + bonusPoints;
+
+    // Award base points
+    await this.awardPoints({
+      userId,
+      amount: basePoints,
+      type: 'vote',
+      referenceId: questionId,
+    });
+
+    // Award bonus points if multiplier > 1
+    if (bonusPoints > 0) {
+      await this.awardPoints({
+        userId,
+        amount: bonusPoints,
+        type: 'streak_bonus',
+        referenceId: questionId,
+        metadata: { multiplier, basePoints },
+      });
+    }
+
+    // Get new balance
+    const newBalance = await this.getBalance(userId);
+
+    logger.info(
+      `Awarded ${totalPoints} points to user ${userId} (base: ${basePoints}, bonus: ${bonusPoints}, multiplier: ${multiplier}x)`
+    );
+
+    return {
+      basePoints,
+      bonusPoints,
+      totalPoints,
+      newBalance,
+    };
+  }
+
+  /**
    * Deduct points for creating a question
    */
   async deductQuestionPoints(

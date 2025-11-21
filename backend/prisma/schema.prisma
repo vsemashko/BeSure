@@ -172,15 +172,17 @@ model PointTransaction {
 }
 
 model UserPointStats {
-  userId          String   @id
-  currentBalance  Int      @default(10)
-  lifetimeEarned  Int      @default(0)
-  lifetimeSpent   Int      @default(0)
-  level           Int      @default(1)
-  streakDays      Int      @default(0)
-  streakLastDate  DateTime?
-  lastVoteDate    DateTime?
-  updatedAt       DateTime @updatedAt
+  userId            String    @id
+  currentBalance    Int       @default(10)
+  lifetimeEarned    Int       @default(0)
+  lifetimeSpent     Int       @default(0)
+  level             Int       @default(1)
+  streakDays        Int       @default(0)
+  longestStreak     Int       @default(0)
+  streakLastDate    DateTime?
+  streakFreezeUsed  DateTime? // Last time freeze was used
+  lastVoteDate      DateTime?
+  updatedAt         DateTime  @updatedAt
 
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
