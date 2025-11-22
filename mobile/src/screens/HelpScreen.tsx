@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,7 +15,7 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { supportApi } from '../api';
 import type { CreateTicketRequest } from '../api/support';
-import { faqData, categoryNames, categoryIcons, FAQItem } from '../data/faq';
+import { faqData, categoryNames, categoryIcons } from '../data/faq';
 import { colors, typography, spacing } from '../theme';
 import logger from '../utils/logger';
 

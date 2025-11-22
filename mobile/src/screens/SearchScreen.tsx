@@ -9,22 +9,15 @@ import {
   ActivityIndicator,
   SafeAreaView,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, typography, spacing } from '../theme';
 import { UserListItem } from '../components/UserListItem';
 import socialApi, { UserListItem as UserType } from '../api/social';
 import logger from '../utils/logger';
-import type { RootStackParamList } from '../navigation/types';
-
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const MAX_RECENT_SEARCHES = 5;
 
 export function SearchScreen() {
-  const navigation = useNavigation<NavigationProp>();
-
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<UserType[]>([]);

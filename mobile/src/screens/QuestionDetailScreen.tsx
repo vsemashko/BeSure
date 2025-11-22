@@ -47,7 +47,7 @@ export function QuestionDetailScreen() {
       if (data.hasVoted) {
         setSelectedOption(data.userVote || null);
       }
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to load question');
       navigation.goBack();
     } finally {

@@ -1,6 +1,5 @@
 import { logger as rnLogger, consoleTransport } from 'react-native-logs';
 import * as Sentry from '@sentry/react-native';
-import { LOG_LEVELS, LogLevel } from '../constants';
 
 const isDevelopment = __DEV__;
 
