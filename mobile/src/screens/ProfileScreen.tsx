@@ -278,7 +278,7 @@ export function ProfileScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Your Expertise</Text>
             <Card style={styles.expertiseCard}>
-              {topicExpertise.topExpertise.map((expertise, index) => (
+              {topicExpertise.topExpertise.map((expertise, _index) => (
                 <View key={expertise.topicId} style={styles.expertiseRow}>
                   <View style={styles.expertiseLeft}>
                     <Text style={styles.expertiseEmoji}>

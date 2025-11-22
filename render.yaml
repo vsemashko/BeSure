@@ -1,0 +1,69 @@
+services:
+  # BeSure Backend API
+  - type: web
+    name: besure-backend
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: cd backend && npm ci && npm run build && npx prisma generate
+    startCommand: cd backend && npx prisma migrate deploy && npm start
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: besure-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 1h
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 7d
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 100
+      - key: LOG_LEVEL
+        value: info
+      - key: CORS_ORIGIN
+        sync: false  # Set this manually in Render dashboard
+      # Optional: Add these manually in Render dashboard
+      # - key: SENTRY_DSN
+      #   sync: false
+      # - key: REDIS_URL
+      #   fromService:
+      #     type: redis
+      #     name: besure-redis
+      #     property: connectionString
+      # - key: AWS_ACCESS_KEY_ID
+      #   sync: false
+      # - key: AWS_SECRET_ACCESS_KEY
+      #   sync: false
+      # - key: AWS_REGION
+      #   value: us-east-1
+      # - key: AWS_S3_BUCKET
+      #   sync: false
+
+databases:
+  # PostgreSQL Database
+  - name: besure-db
+    databaseName: besure
+    user: besure
+    plan: starter
+    region: oregon
+    ipAllowList: []  # Empty array allows all IPs
+    postgresMajorVersion: 16
+
+# Optional: Redis for caching and sessions
+# - type: redis
+#   name: besure-redis
+#   plan: starter
+#   region: oregon
+#   maxmemoryPolicy: allkeys-lru
+#   ipAllowList: []

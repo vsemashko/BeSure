@@ -1,7 +1,11 @@
+import { initSentry } from './config/sentry';
 import createApp from './app';
 import config from './config/constants';
 import logger from './utils/logger';
 import prisma from './config/database';
+
+// Initialize Sentry first to catch all errors
+initSentry();
 
 /**
  * Start the server
@@ -63,12 +67,14 @@ const startServer = async () => {
     // Handle uncaught errors
     process.on('uncaughtException', (error) => {
       logger.error('Uncaught Exception:', error);
-      process.exit(1);
+      // Let Sentry capture the error
+      setTimeout(() => process.exit(1), 1000);
     });
 
     process.on('unhandledRejection', (reason, promise) => {
       logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
-      process.exit(1);
+      // Let Sentry capture the error
+      setTimeout(() => process.exit(1), 1000);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);

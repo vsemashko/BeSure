@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import referralService from '../../services/referral.service';
-import logger from '../../utils/logger';
 
 class ReferralController {
   /**
@@ -71,33 +70,35 @@ class ReferralController {
    * POST /api/v1/referral/validate
    * Validate a referral code (public endpoint for signup flow)
    */
-  async validateReferralCode(req: Request, res: Response, next: NextFunction) {
+  async validateReferralCode(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { code } = req.body;
 
       if (!code) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Referral code is required',
         });
+        return;
       }
 
       // Validate format
       const isValidFormat = referralService.validateReferralCode(code);
 
       if (!isValidFormat) {
-        return res.json({
+        res.json({
           success: true,
           data: {
             valid: false,
             message: 'Invalid referral code format',
           },
         });
+        return;
       }
 
       // Check if code exists (without revealing user info)
       try {
-        const result = await referralService.getUserReferralCode(code);
+        await referralService.getUserReferralCode(code);
         res.json({
           success: true,
           data: {

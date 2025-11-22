@@ -5,6 +5,7 @@ import Constants from 'expo-constants';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { ErrorBoundary } from './src/components';
 import logger from './src/utils/logger';
+import { analytics } from './src/utils/analytics';
 
 // Initialize Sentry
 const SENTRY_DSN = Constants.expoConfig?.extra?.sentryDsn;
@@ -21,6 +22,8 @@ if (SENTRY_DSN && !__DEV__) {
 
 function App() {
   useEffect(() => {
+    // Initialize analytics
+    analytics.initialize();
     logger.info('BeSure app started');
   }, []);
 

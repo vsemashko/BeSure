@@ -125,7 +125,7 @@ class ApiClient {
               originalRequest.headers.Authorization = `Bearer ${newToken}`;
               return this.client(originalRequest);
             }
-          } catch (refreshError) {
+          } catch {
             // Refresh failed, clear tokens and redirect to login
             await this.clearTokens();
             throw this.createApiError(ERROR_MESSAGES.TOKEN_EXPIRED, 401, 'TOKEN_EXPIRED');
@@ -318,7 +318,7 @@ class ApiClient {
       try {
         await this.handleTokenRefresh();
         return true;
-      } catch (error) {
+      } catch {
         await this.clearTokens();
         return false;
       }

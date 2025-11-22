@@ -46,7 +46,7 @@ export function QuestionCard({ question, onPress }: QuestionCardProps) {
 
         {/* Options Preview */}
         <View style={styles.optionsPreview}>
-          {question.options.slice(0, 2).map((option, index) => (
+          {question.options.slice(0, 2).map((option, _index) => (
             <View key={option.id} style={styles.optionPreview}>
               <Text style={styles.optionText} numberOfLines={1}>
                 {option.content}

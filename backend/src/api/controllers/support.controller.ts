@@ -32,13 +32,14 @@ class SupportController {
       // Validate input
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           error: {
             message: 'Validation failed',
             details: errors.array(),
           },
         });
+        return;
       }
 
       const userId = req.user!.id;

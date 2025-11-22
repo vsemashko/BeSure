@@ -5,6 +5,7 @@ import config from '../config/constants';
 import { ValidationError, AuthenticationError, ConflictError } from '../utils/errors';
 import logger from '../utils/logger';
 import referralService from './referral.service';
+import analytics from './analytics-tracking.service';
 
 const SALT_ROUNDS = 10;
 
@@ -76,12 +77,20 @@ class AuthService {
     // Hash password
     const passwordHash = await bcrypt.hash(input.password, SALT_ROUNDS);
 
-    // Create user with point stats
+    // Generate unique referral code
+    const referralCodeChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let referralCode = '';
+    for (let i = 0; i < 8; i++) {
+      referralCode += referralCodeChars[Math.floor(Math.random() * referralCodeChars.length)];
+    }
+
+    // Create user with point stats and referral code
     const user = await prisma.user.create({
       data: {
         email: input.email,
         username: input.username,
         passwordHash,
+        referralCode,
         points: config.points.startingBalance,
         pointStats: {
           create: {
@@ -102,9 +111,6 @@ class AuthService {
       },
     });
 
-    // Generate referral code for new user
-    await referralService.createReferralCode(user.id);
-
     // Apply referral code if provided
     if (input.referralCode) {
       try {
@@ -121,6 +127,21 @@ class AuthService {
 
     // Log registration
     logger.info(`New user registered: ${user.username} (${user.email})`);
+
+    // Track signup in analytics
+    analytics.trackSignup(user.id, {
+      username: user.username,
+      has_referral_code: !!input.referralCode,
+      signup_method: 'email',
+    });
+
+    // Identify user in analytics
+    analytics.identify(user.id, {
+      email: user.email,
+      username: user.username,
+      signup_date: user.createdAt.toISOString(),
+      starting_points: config.points.startingBalance,
+    });
 
     // Generate tokens
     const { token, refreshToken } = this.generateTokens(user.id, user.email);
@@ -163,9 +184,12 @@ class AuthService {
     const { token, refreshToken } = this.generateTokens(user.id, user.email);
 
     // Remove password hash from response
-    const { passwordHash, ...userWithoutPassword } = user;
+    const { passwordHash: _passwordHash, ...userWithoutPassword } = user;
 
     logger.info(`User logged in: ${user.username} (${user.email})`);
+
+    // Track login in analytics
+    analytics.trackLogin(user.id);
 
     return {
       user: userWithoutPassword,

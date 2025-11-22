@@ -10,7 +10,7 @@ import {
   Alert,
   Share,
 } from 'react-native';
-import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import { useRoute, RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import analyticsApi from '../api/analytics';
 import type { QuestionInsights } from '../api/analytics';
@@ -24,7 +24,6 @@ type QuestionInsightsRouteProp = RouteProp<RootStackParamList, 'QuestionInsights
 
 export const QuestionInsightsScreen: React.FC = () => {
   const route = useRoute<QuestionInsightsRouteProp>();
-  const navigation = useNavigation();
   const { questionId } = route.params;
 
   const [insights, setInsights] = useState<QuestionInsights | null>(null);

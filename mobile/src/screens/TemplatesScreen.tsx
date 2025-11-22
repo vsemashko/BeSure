@@ -12,7 +12,6 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, typography, spacing } from '../theme';
-import { Card } from '../components/Card';
 import {
   TEMPLATE_CATEGORIES,
   QUESTION_TEMPLATES,

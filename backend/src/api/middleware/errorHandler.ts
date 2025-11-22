@@ -3,6 +3,7 @@ import { AppError, ValidationError } from '../../utils/errors';
 import { sendError } from '../../utils/helpers';
 import logger from '../../utils/logger';
 import config from '../../config/constants';
+import { captureException, addBreadcrumb } from '../../config/sentry';
 
 /**
  * Global error handler middleware
@@ -13,6 +14,19 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction
 ): Response => {
+  // Add breadcrumb for Sentry
+  addBreadcrumb(
+    `Error in ${req.method} ${req.path}`,
+    'error',
+    'error',
+    {
+      method: req.method,
+      path: req.path,
+      query: req.query,
+      ip: req.ip,
+    }
+  );
+
   // Log error (but don't log validation errors at error level)
   if (err instanceof ValidationError) {
     logger.warn('Validation error:', {
@@ -22,6 +36,7 @@ export const errorHandler = (
       method: req.method,
       ip: req.ip,
     });
+    // Don't send validation errors to Sentry (these are user errors, not system errors)
   } else {
     logger.error('Error occurred:', {
       error: err.message,
@@ -30,6 +45,23 @@ export const errorHandler = (
       method: req.method,
       ip: req.ip,
     });
+
+    // Send to Sentry if it's a server error (5xx)
+    const statusCode = err instanceof AppError ? err.statusCode : 500;
+    if (statusCode >= 500) {
+      captureException(err, {
+        request: {
+          method: req.method,
+          url: req.url,
+          query: req.query,
+          body: req.body,
+          headers: {
+            'user-agent': req.get('user-agent'),
+            'content-type': req.get('content-type'),
+          },
+        },
+      });
+    }
   }
 
   // Handle validation errors with detailed messages
