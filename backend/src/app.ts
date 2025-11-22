@@ -69,7 +69,7 @@ const createApp = (): Application => {
   // 404 handler
   app.use(notFoundHandler);
 
-  // Global error handler
+  // Global error handler (includes Sentry integration)
   app.use(errorHandler);
 
   return app;
