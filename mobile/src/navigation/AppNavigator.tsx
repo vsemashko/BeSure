@@ -22,6 +22,7 @@ import { FollowersScreen } from '../screens/FollowersScreen';
 import { FollowingScreen } from '../screens/FollowingScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { NotificationPreferencesScreen } from '../screens/NotificationPreferencesScreen';
+import { SearchScreen } from '../screens/SearchScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -53,6 +54,15 @@ function MainTabs() {
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Search"
+        component={SearchScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="search" size={size} color={color} />
           ),
         }}
       />
