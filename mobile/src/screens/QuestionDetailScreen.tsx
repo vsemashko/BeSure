@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Share,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
@@ -20,6 +21,7 @@ import { useAuthStore } from '../store/authStore';
 import { colors, typography, spacing, optionColors, borderRadius } from '../theme';
 import type { Question } from '../types';
 import type { RootStackParamList } from '../navigation/types';
+import logger from '../utils/logger';
 
 type RouteParams = RouteProp<RootStackParamList, 'QuestionDetail'>;
 
@@ -79,6 +81,52 @@ export function QuestionDetailScreen() {
     }
   };
 
+  const handleShareResults = async () => {
+    if (!question) return;
+
+    try {
+      // Sort options by vote count/percentage for better readability
+      const sortedOptions = [...question.options].sort((a, b) =>
+        (b.percentage || 0) - (a.percentage || 0)
+      );
+
+      // Build share message
+      const resultsText = sortedOptions
+        .map((option, index) => {
+          const percentage = (option.percentage || 0).toFixed(0);
+          const emoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '•';
+          return `${emoji} ${option.content}: ${percentage}% (${option.voteCount || 0} votes)`;
+        })
+        .join('\n');
+
+      const shareMessage = `
+📊 BeSure Poll Results
+
+${question.title}
+
+Results:
+${resultsText}
+
+Total Votes: ${question.totalVotes}
+${question.isAnonymous ? '' : `Posted by: @${question.user?.username}`}
+
+Vote on this and more at BeSure! 🎯
+      `.trim();
+
+      const result = await Share.share({
+        message: shareMessage,
+        title: `BeSure Poll: ${question.title}`,
+      });
+
+      if (result.action === Share.sharedAction) {
+        logger.info('Results shared successfully', { questionId: question.id });
+      }
+    } catch (error) {
+      logger.error('Failed to share results', error);
+      Alert.alert('Error', 'Failed to share results. Please try again.');
+    }
+  };
+
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -108,15 +156,25 @@ export function QuestionDetailScreen() {
                 <Text style={styles.username}>@{question.user?.username}</Text>
               )}
             </View>
-            <View style={[styles.timer, isExpired && styles.timerExpired]}>
-              <Ionicons
-                name={isExpired ? 'close-circle' : 'time-outline'}
-                size={16}
-                color={isExpired ? colors.error : colors.mediumGray}
-              />
-              <Text style={[styles.timerText, isExpired && styles.timerExpiredText]}>
-                {isExpired ? 'Closed' : timeLeft}
-              </Text>
+            <View style={styles.headerRight}>
+              <View style={[styles.timer, isExpired && styles.timerExpired]}>
+                <Ionicons
+                  name={isExpired ? 'close-circle' : 'time-outline'}
+                  size={16}
+                  color={isExpired ? colors.error : colors.mediumGray}
+                />
+                <Text style={[styles.timerText, isExpired && styles.timerExpiredText]}>
+                  {isExpired ? 'Closed' : timeLeft}
+                </Text>
+              </View>
+              {(question.hasVoted || isExpired) && (
+                <TouchableOpacity
+                  onPress={handleShareResults}
+                  style={styles.shareButton}
+                >
+                  <Ionicons name="share-outline" size={20} color={colors.primary} />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
 
@@ -213,6 +271,16 @@ export function QuestionDetailScreen() {
             <Text style={styles.votedText}>You've already voted on this question</Text>
           </View>
         )}
+
+        {/* Share Results Button */}
+        {(question.hasVoted || isExpired) && (
+          <Button
+            title="Share Results"
+            onPress={handleShareResults}
+            variant="secondary"
+            style={styles.shareResultsButton}
+          />
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -250,6 +318,11 @@ const styles = StyleSheet.create({
     color: colors.mediumGray,
     fontStyle: 'italic',
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
   timer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -258,6 +331,9 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     backgroundColor: colors.background,
     borderRadius: 12,
+  },
+  shareButton: {
+    padding: spacing.xs,
   },
   timerExpired: {
     backgroundColor: colors.error + '20',
@@ -375,6 +451,9 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.body,
     color: colors.success,
     fontWeight: typography.fontWeight.semiBold,
+  },
+  shareResultsButton: {
+    marginTop: spacing.md,
   },
 });
 
