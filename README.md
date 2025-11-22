@@ -341,16 +341,44 @@ Create via registration or use:
 
 ## 🚢 Deployment
 
-### Backend Deployment (Railway)
+### Quick Start: Deploy to Staging in 15 Minutes ⚡
 
-1. Create account on Railway.app
-2. Create new project
-3. Add PostgreSQL database
-4. Connect GitHub repository
-5. Set environment variables
-6. Deploy!
+```bash
+cd backend
+npm run deploy:staging
+```
 
-See [backend/README.md](./backend/README.md) for detailed instructions.
+The interactive wizard will guide you through:
+- Platform selection (Railway or Render)
+- Environment configuration
+- Database setup
+- Automated deployment
+- Health checks and verification
+
+**See:** [QUICK_START_STAGING.md](./QUICK_START_STAGING.md)
+
+### Deployment Documentation
+
+**Staging Environment:**
+- **[Quick Start Guide](./QUICK_START_STAGING.md)** - Fastest path to staging (15-20 min)
+- **[Staging Deployment Guide](./STAGING_DEPLOYMENT_GUIDE.md)** - Comprehensive 400+ line guide
+- **[Deployment Checklist](./DEPLOYMENT_CHECKLIST.md)** - Step-by-step verification
+
+**Production Environment:**
+- **[Production Deployment Guide](./PRODUCTION_DEPLOYMENT.md)** - Complete production setup
+- **[Week 1 Progress](./WEEK1_PROGRESS.md)** - QA and deployment preparation
+
+**Automated Scripts:**
+- `npm run deploy:staging` - Interactive wizard
+- `npm run deploy:railway` - Deploy to Railway
+- `npm run deploy:render` - Deploy to Render
+- `npm run deploy:health <url>` - Health checks (7 tests)
+- `npm run deploy:smoke <url>` - Smoke tests (15+ tests)
+- `npm run db:backup` - Database backup
+- `npm run db:migrate:prod` - Production migrations
+- `npm run setup:env` - Environment setup wizard
+
+**See:** [scripts/README.md](./scripts/README.md) for complete documentation
 
 ### Mobile Deployment (Expo)
 
