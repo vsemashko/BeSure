@@ -61,6 +61,50 @@ export const authApi = {
       await apiClient.clearTokens();
     }
   },
+
+  /**
+   * Update user profile
+   */
+  async updateProfile(data: {
+    username?: string;
+    profileData?: {
+      avatarUrl?: string;
+      bio?: string;
+      displayName?: string;
+    };
+    preferences?: {
+      emailNotifications?: boolean;
+      pushNotifications?: boolean;
+      theme?: 'light' | 'dark' | 'auto';
+    };
+  }): Promise<User> {
+    const response = await apiClient.put<ApiResponse<User>>('/auth/profile', data);
+
+    if (response.success && response.data) {
+      return response.data;
+    }
+
+    throw new Error(response.error?.message || 'Failed to update profile');
+  },
+
+  /**
+   * Change password
+   */
+  async changePassword(data: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<{ message: string }> {
+    const response = await apiClient.put<ApiResponse<{ message: string }>>(
+      '/auth/password',
+      data
+    );
+
+    if (response.success && response.data) {
+      return response.data;
+    }
+
+    throw new Error(response.error?.message || 'Failed to change password');
+  },
 };
 
 export default authApi;

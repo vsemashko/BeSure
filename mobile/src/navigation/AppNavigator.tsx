@@ -8,7 +8,7 @@ import { useAuthStore } from '../store/authStore';
 import { colors } from '../theme';
 import type { RootStackParamList, MainTabParamList } from './types';
 
-// Screens (will be created next)
+// Screens
 import WelcomeScreen from '../screens/WelcomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
@@ -16,6 +16,7 @@ import FeedScreen from '../screens/FeedScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import CreateQuestionScreen from '../screens/CreateQuestionScreen';
 import QuestionDetailScreen from '../screens/QuestionDetailScreen';
+import { EditProfileScreen } from '../screens/EditProfileScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -104,6 +105,13 @@ export function AppNavigator() {
                 headerShown: true,
                 headerTitle: 'Question',
                 headerBackTitle: 'Back',
+              }}
+            />
+            <Stack.Screen
+              name="EditProfile"
+              component={EditProfileScreen}
+              options={{
+                headerShown: false,
               }}
             />
           </>

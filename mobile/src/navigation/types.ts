@@ -14,6 +14,8 @@ export type RootStackParamList = {
   QuestionDetail: { questionId: string };
   CreateQuestion: undefined;
   Results: { questionId: string };
+  EditProfile: undefined;
+  ChangePassword: undefined;
 };
 
 export type MainTabParamList = {

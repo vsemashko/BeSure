@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { useAuthStore } from '../store/authStore';
@@ -21,6 +22,7 @@ import type { DailyChallenges, Challenge } from '../api/challenges';
 import type { UserTopicProfile } from '../api/topics';
 
 export function ProfileScreen() {
+  const navigation = useNavigation();
   const { user, logout } = useAuthStore();
   const [myQuestions, setMyQuestions] = useState<Question[]>([]);
   const [streakInfo, setStreakInfo] = useState<StreakInfo | null>(null);
@@ -107,9 +109,17 @@ export function ProfileScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Profile</Text>
-          <TouchableOpacity onPress={handleLogout}>
-            <Ionicons name="log-out-outline" size={24} color={colors.error} />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('EditProfile' as never)}
+              style={styles.headerButton}
+            >
+              <Ionicons name="create-outline" size={24} color={colors.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleLogout}>
+              <Ionicons name="log-out-outline" size={24} color={colors.error} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* User Info Card */}
@@ -358,6 +368,14 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.h1,
     fontWeight: typography.fontWeight.bold,
     color: colors.textPrimary,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    alignItems: 'center',
+  },
+  headerButton: {
+    padding: spacing.xs,
   },
   userCard: {
     alignItems: 'center',
