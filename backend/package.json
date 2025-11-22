@@ -25,7 +25,14 @@
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
     "clean": "rm -rf dist node_modules",
-    "prepare": "prisma generate"
+    "prepare": "prisma generate",
+    "deploy:railway": "../scripts/deploy-railway.sh",
+    "deploy:render": "../scripts/deploy-render.sh",
+    "db:migrate:prod": "../scripts/migrate-production.sh",
+    "db:backup": "../scripts/backup-db.sh",
+    "deploy:health": "../scripts/health-check.sh",
+    "deploy:smoke": "../scripts/smoke-test.sh",
+    "setup:env": "../scripts/setup-env.sh"
   },
   "keywords": [
     "voting",
