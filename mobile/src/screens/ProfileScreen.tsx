@@ -171,6 +171,27 @@ export function ProfileScreen() {
           />
         </View>
 
+        {/* Invite Friends Card */}
+        <Card style={styles.inviteCard}>
+          <View style={styles.inviteContent}>
+            <View style={styles.inviteIcon}>
+              <Text style={styles.inviteEmoji}>🎁</Text>
+            </View>
+            <View style={styles.inviteTextContainer}>
+              <Text style={styles.inviteTitle}>Invite Friends & Earn Points!</Text>
+              <Text style={styles.inviteDescription}>
+                Get 10 points for every friend who joins
+              </Text>
+            </View>
+          </View>
+          <Button
+            title="Invite Friends"
+            onPress={() => navigation.navigate('InviteFriends' as never)}
+            variant="primary"
+            style={styles.inviteButton}
+          />
+        </Card>
+
         {/* Streak Card */}
         {streakInfo && (
           <Card style={styles.streakCard}>
@@ -760,6 +781,40 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
+  },
+  // Invite friends card styles
+  inviteCard: {
+    marginBottom: spacing.lg,
+    backgroundColor: colors.primary + '10',
+    borderWidth: 1,
+    borderColor: colors.primary + '30',
+  },
+  inviteContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  inviteIcon: {
+    marginRight: spacing.md,
+  },
+  inviteEmoji: {
+    fontSize: 40,
+  },
+  inviteTextContainer: {
+    flex: 1,
+  },
+  inviteTitle: {
+    fontSize: typography.fontSize.body,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
+  },
+  inviteDescription: {
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.textSecondary,
+  },
+  inviteButton: {
+    width: '100%',
   },
 });
 

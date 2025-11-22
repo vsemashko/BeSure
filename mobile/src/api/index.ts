@@ -9,3 +9,4 @@ export { default as socialApi } from './social';
 export { default as leaderboardApi } from './leaderboard';
 export { uploadApi } from './upload';
 export { default as analyticsApi } from './analytics';
+export { default as referralApi } from './referral';

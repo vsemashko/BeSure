@@ -22,6 +22,7 @@ export type RootStackParamList = {
   NotificationPreferences: undefined;
   Templates: undefined;
   QuestionInsights: { questionId: string };
+  InviteFriends: undefined;
 };
 
 export type MainTabParamList = {
