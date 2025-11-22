@@ -27,6 +27,11 @@ jest.mock('../../utils/logger', () => ({
   },
 }));
 
+// Test constants - NOT REAL SECRETS
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'ValidPass123!';
+const TEST_EMAIL = 'test@example.com';
+const TEST_USERNAME = 'testuser';
+
 describe('AuthService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -34,9 +39,9 @@ describe('AuthService', () => {
 
   describe('register', () => {
     const validRegisterInput = {
-      email: 'test@example.com',
-      username: 'testuser',
-      password: 'Test123!@#',
+      email: TEST_EMAIL,
+      username: TEST_USERNAME,
+      password: TEST_PASSWORD,
     };
 
     it('should successfully register a new user', async () => {
@@ -120,8 +125,8 @@ describe('AuthService', () => {
 
   describe('login', () => {
     const validLoginInput = {
-      email: 'test@example.com',
-      password: 'Test123!@#',
+      email: TEST_EMAIL,
+      password: TEST_PASSWORD,
     };
 
     it('should successfully login with valid credentials', async () => {
