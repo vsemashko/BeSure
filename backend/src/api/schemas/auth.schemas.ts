@@ -78,3 +78,46 @@ export const loginSchema = {
     }),
   }),
 };
+
+/**
+ * Refresh token schema
+ */
+export const refreshTokenSchema = {
+  body: Joi.object({
+    refreshToken: Joi.string().required().messages({
+      'any.required': 'Refresh token is required',
+      'string.empty': 'Refresh token cannot be empty',
+    }),
+  }),
+};
+
+/**
+ * Update profile schema
+ */
+export const updateProfileSchema = {
+  body: Joi.object({
+    username: usernameSchema.optional(),
+    profileData: Joi.object({
+      avatarUrl: Joi.string().uri().max(500).optional(),
+      bio: Joi.string().max(500).optional(),
+      displayName: Joi.string().max(100).optional(),
+    }).optional(),
+    preferences: Joi.object({
+      emailNotifications: Joi.boolean().optional(),
+      pushNotifications: Joi.boolean().optional(),
+      theme: Joi.string().valid('light', 'dark', 'auto').optional(),
+    }).optional(),
+  }).min(1), // At least one field required
+};
+
+/**
+ * Change password schema
+ */
+export const changePasswordSchema = {
+  body: Joi.object({
+    currentPassword: Joi.string().required().messages({
+      'any.required': 'Current password is required',
+    }),
+    newPassword: passwordSchema,
+  }),
+};

@@ -3,7 +3,13 @@ import authController from '../controllers/auth.controller';
 import { authenticate } from '../middleware/auth';
 import { authRateLimiter } from '../middleware/rateLimiter';
 import { validate } from '../middleware/validation';
-import { registerSchema, loginSchema } from '../schemas/auth.schemas';
+import {
+  registerSchema,
+  loginSchema,
+  refreshTokenSchema,
+  updateProfileSchema,
+  changePasswordSchema,
+} from '../schemas/auth.schemas';
 
 const router = Router();
 
@@ -23,6 +29,12 @@ router.post('/register', validate(registerSchema), authController.register);
 router.post('/login', validate(loginSchema), authController.login);
 
 /**
+ * POST /api/v1/auth/refresh
+ * Refresh access token using refresh token
+ */
+router.post('/refresh', validate(refreshTokenSchema), authController.refresh);
+
+/**
  * POST /api/v1/auth/logout
  * Logout user (client handles token removal)
  */
@@ -33,5 +45,17 @@ router.post('/logout', authenticate, authController.logout);
  * Get current user profile
  */
 router.get('/me', authenticate, authController.getMe);
+
+/**
+ * PUT /api/v1/auth/profile
+ * Update user profile
+ */
+router.put('/profile', authenticate, validate(updateProfileSchema), authController.updateProfile);
+
+/**
+ * PUT /api/v1/auth/password
+ * Change password
+ */
+router.put('/password', authenticate, validate(changePasswordSchema), authController.changePassword);
 
 export default router;

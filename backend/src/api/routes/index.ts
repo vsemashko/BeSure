@@ -8,6 +8,7 @@ import topicRoutes from './topic.routes';
 import notificationRoutes from './notification.routes';
 import socialRoutes from './social.routes';
 import leaderboardRoutes from './leaderboard.routes';
+import uploadRoutes from './upload.routes';
 
 const router = Router();
 
@@ -33,6 +34,7 @@ router.use('/topics', topicRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/social', socialRoutes);
 router.use('/leaderboard', leaderboardRoutes);
+router.use('/upload', uploadRoutes);
 
 // Future routes:
 // router.use('/users', userRoutes);

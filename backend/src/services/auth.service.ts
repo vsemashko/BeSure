@@ -30,6 +30,25 @@ export interface AuthResponse {
   refreshToken: string;
 }
 
+export interface UpdateProfileInput {
+  username?: string;
+  profileData?: {
+    avatarUrl?: string;
+    bio?: string;
+    displayName?: string;
+  };
+  preferences?: {
+    emailNotifications?: boolean;
+    pushNotifications?: boolean;
+    theme?: 'light' | 'dark' | 'auto';
+  };
+}
+
+export interface ChangePasswordInput {
+  currentPassword: string;
+  newPassword: string;
+}
+
 class AuthService {
   /**
    * Register a new user
@@ -159,6 +178,147 @@ class AuthService {
     }
 
     return user;
+  }
+
+  /**
+   * Refresh access token using refresh token
+   */
+  async refreshToken(refreshToken: string): Promise<{ token: string; refreshToken: string }> {
+    try {
+      // Verify refresh token
+      const decoded = jwt.verify(refreshToken, config.jwtSecret) as {
+        userId: string;
+        email: string;
+      };
+
+      // Verify user still exists
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.userId },
+        select: { id: true, email: true },
+      });
+
+      if (!user) {
+        throw new AuthenticationError('User not found');
+      }
+
+      // Generate new tokens
+      const tokens = this.generateTokens(user.id, user.email);
+
+      logger.info(`Token refreshed for user: ${user.email}`);
+
+      return tokens;
+    } catch (error) {
+      if (error instanceof jwt.JsonWebTokenError) {
+        throw new AuthenticationError('Invalid refresh token');
+      }
+      if (error instanceof jwt.TokenExpiredError) {
+        throw new AuthenticationError('Refresh token expired');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Update user profile
+   */
+  async updateProfile(userId: string, input: UpdateProfileInput) {
+    // Check if username is being updated and if it's already taken
+    if (input.username) {
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          username: input.username,
+          NOT: { id: userId },
+        },
+      });
+
+      if (existingUser) {
+        throw new ConflictError('Username already taken');
+      }
+    }
+
+    // Get current profile data and preferences
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { profileData: true, preferences: true },
+    });
+
+    // Merge profileData and preferences
+    const updatedProfileData = input.profileData
+      ? { ...(currentUser?.profileData as object || {}), ...input.profileData }
+      : undefined;
+
+    const updatedPreferences = input.preferences
+      ? { ...(currentUser?.preferences as object || {}), ...input.preferences }
+      : undefined;
+
+    // Update user
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        username: input.username,
+        profileData: updatedProfileData as any,
+        preferences: updatedPreferences as any,
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        points: true,
+        profileData: true,
+        preferences: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    logger.info(`Profile updated for user: ${updatedUser.username}`);
+
+    return updatedUser;
+  }
+
+  /**
+   * Change password
+   */
+  async changePassword(userId: string, input: ChangePasswordInput) {
+    // Get user with password hash
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, username: true, passwordHash: true },
+    });
+
+    if (!user) {
+      throw new AuthenticationError('User not found');
+    }
+
+    // Verify current password
+    const isValidPassword = await bcrypt.compare(input.currentPassword, user.passwordHash);
+    if (!isValidPassword) {
+      throw new AuthenticationError('Current password is incorrect');
+    }
+
+    // Validate new password (same rules as registration)
+    if (input.newPassword.length < 8) {
+      throw new ValidationError('Password must be at least 8 characters');
+    }
+    if (!/\d/.test(input.newPassword)) {
+      throw new ValidationError('Password must contain at least one number');
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(input.newPassword)) {
+      throw new ValidationError('Password must contain at least one special character');
+    }
+
+    // Hash new password
+    const newPasswordHash = await bcrypt.hash(input.newPassword, SALT_ROUNDS);
+
+    // Update password
+    await prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash: newPasswordHash },
+    });
+
+    logger.info(`Password changed for user: ${user.username}`);
+
+    return { message: 'Password changed successfully' };
   }
 
   /**
