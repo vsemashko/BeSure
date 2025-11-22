@@ -18,6 +18,8 @@ import CreateQuestionScreen from '../screens/CreateQuestionScreen';
 import QuestionDetailScreen from '../screens/QuestionDetailScreen';
 import { EditProfileScreen } from '../screens/EditProfileScreen';
 import { ChangePasswordScreen } from '../screens/ChangePasswordScreen';
+import { FollowersScreen } from '../screens/FollowersScreen';
+import { FollowingScreen } from '../screens/FollowingScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -118,6 +120,20 @@ export function AppNavigator() {
             <Stack.Screen
               name="ChangePassword"
               component={ChangePasswordScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="Followers"
+              component={FollowersScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="Following"
+              component={FollowingScreen}
               options={{
                 headerShown: false,
               }}

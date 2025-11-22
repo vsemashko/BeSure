@@ -147,10 +147,27 @@ export function ProfileScreen() {
             color={colors.primary}
           />
           <StatsCard
+            icon="people-outline"
+            label="Followers"
+            value="0"
+            color={colors.success}
+            onPress={() => navigation.navigate('Followers' as never, { userId: user?.id, username: user?.username } as never)}
+          />
+        </View>
+
+        <View style={styles.statsGrid}>
+          <StatsCard
+            icon="person-add-outline"
+            label="Following"
+            value="0"
+            color={colors.warning}
+            onPress={() => navigation.navigate('Following' as never, { userId: user?.id, username: user?.username } as never)}
+          />
+          <StatsCard
             icon="checkmark-done-outline"
             label="Votes Given"
             value="-"
-            color={colors.success}
+            color={colors.mediumGray}
           />
         </View>
 
@@ -333,21 +350,33 @@ function StatsCard({
   label,
   value,
   color,
+  onPress,
 }: {
   icon: string;
   label: string;
   value: number | string;
   color: string;
+  onPress?: () => void;
 }) {
-  return (
-    <Card style={styles.statsCard}>
+  const content = (
+    <>
       <View style={[styles.statsIcon, { backgroundColor: color + '20' }]}>
         <Ionicons name={icon as any} size={24} color={color} />
       </View>
       <Text style={styles.statsValue}>{value}</Text>
       <Text style={styles.statsLabel}>{label}</Text>
-    </Card>
+    </>
   );
+
+  if (onPress) {
+    return (
+      <TouchableOpacity onPress={onPress} style={styles.statsCardTouchable}>
+        <Card style={styles.statsCard}>{content}</Card>
+      </TouchableOpacity>
+    );
+  }
+
+  return <Card style={styles.statsCard}>{content}</Card>;
 }
 
 const styles = StyleSheet.create({
@@ -424,6 +453,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.md,
     marginBottom: spacing.lg,
+  },
+  statsCardTouchable: {
+    flex: 1,
   },
   statsCard: {
     flex: 1,

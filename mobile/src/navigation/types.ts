@@ -16,6 +16,8 @@ export type RootStackParamList = {
   Results: { questionId: string };
   EditProfile: undefined;
   ChangePassword: undefined;
+  Followers: { userId: string; username?: string };
+  Following: { userId: string; username?: string };
 };
 
 export type MainTabParamList = {
