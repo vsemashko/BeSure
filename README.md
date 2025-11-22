@@ -31,8 +31,23 @@ Comprehensive PRD documentation available in [`/docs`](./docs):
 
 ### Prerequisites
 
-- Node.js 18+ and npm
-- PostgreSQL 15+
+**Option 1: Using mise (Recommended)**
+```bash
+# Install mise
+curl https://mise.run | sh
+
+# Install all required runtimes
+mise install
+
+# This will install:
+# - Node.js 22.12.0
+# - PostgreSQL 16.4
+```
+
+**Option 2: Manual Installation**
+- Node.js 22+ and npm
+- PostgreSQL 16+
+- Redis 7+ (optional, can use Docker)
 - Expo CLI (for mobile development)
 
 ### Setup
@@ -41,6 +56,9 @@ Comprehensive PRD documentation available in [`/docs`](./docs):
 ```bash
 git clone <repository-url>
 cd BeSure
+
+# If using mise, activate runtimes
+mise trust
 ```
 
 **2. Set up the backend**
@@ -74,45 +92,87 @@ npm start
 See detailed setup instructions in:
 - [Backend README](./backend/README.md)
 - [Mobile README](./mobile/README.md)
+- [Development Guide](./DEVELOPMENT.md)
+- [Product Roadmap](./ROADMAP.md)
 
 ## 📱 Features (MVP)
 
 ### ✅ Completed
 
-**Authentication**
+**Authentication & Profile**
 - User registration and login
-- JWT-based authentication
+- JWT-based authentication with auto-refresh
+- Token refresh system (15min access, 7d refresh)
 - Secure token storage
+- Profile management (username, bio, display name)
+- Profile picture upload
+- Password change functionality
 - Auto-login
 
 **Point System**
 - Starting balance: 10 points
 - Earn +2 points per vote
 - Question costs: 10-18 points (dynamic)
+- Streak system with multipliers (1.0x - 2.5x)
+- Daily challenges with bonus points
 - Completion rewards based on engagement
+- Point transaction history
 
-**Questions**
+**Questions & Rich Media**
 - Create questions with 2-6 options
+- Question image upload
+- Option image upload (per option)
 - Set expiration (5min - 7 days)
-- Anonymous mode
+- Anonymous mode (+3 points)
+- Urgent questions (+5 points, <6 hours)
 - Privacy levels (public/friends)
+- Image picker integration
 
 **Voting**
 - Vote on questions
-- Real-time results
-- Vote history
+- Real-time results with percentages
+- Vote history tracking
 - Earn points instantly
+- Streak tracking
 
-**Feed**
+**Feed & Discovery**
 - Browse questions (For You, Urgent, Popular)
 - Pull to refresh
 - Infinite scroll
 - Smart filtering
+- Exclude already-voted questions
 
-**Profile**
-- View stats and points
+**Profile & Stats**
+- View stats and points balance
 - Question history
-- Logout
+- Streak information
+- Daily challenges progress
+- Topic expertise levels
+- Leaderboard rankings
+
+**Advanced Features**
+- Topic expertise tracking
+- Leaderboards (global, friends, topics)
+- Daily challenges system
+- Push notifications (basic)
+- Image storage (S3/Cloudflare R2)
+- Error tracking (Sentry)
+- Comprehensive logging
+
+### 🔄 In Progress
+- Password change screen (mobile UI)
+- Results export/sharing
+- Enhanced analytics
+
+### 📋 Planned (See [ROADMAP.md](./ROADMAP.md))
+- Social features (follow, share)
+- Question templates
+- Search & discovery
+- Enhanced notifications
+- Premium tier
+- Native ads
+- Groups & communities
+- Live voting events
 
 ## 🏗️ Architecture
 
@@ -142,49 +202,72 @@ BeSure/
 ## 🛠️ Tech Stack
 
 ### Backend
-- **Runtime:** Node.js 20+
-- **Framework:** Express.js with TypeScript
-- **Database:** PostgreSQL 15+ with Prisma ORM
-- **Auth:** JWT with bcrypt
-- **Validation:** express-validator
-- **Logging:** Winston
+- **Runtime:** Node.js 22.12.0
+- **Framework:** Express.js with TypeScript 5.7
+- **Database:** PostgreSQL 16 with Prisma ORM
+- **Caching:** Redis (optional, recommended for production)
+- **Auth:** JWT with bcrypt (access + refresh tokens)
+- **Validation:** Joi
+- **Logging:** Winston + custom logger
+- **Error Tracking:** Sentry
+- **File Storage:** AWS S3 / Cloudflare R2
 
 ### Frontend (Mobile)
-- **Framework:** React Native 0.73 with Expo ~50.0
-- **Language:** TypeScript
-- **Navigation:** React Navigation 6
+- **Framework:** React Native 0.81 with Expo ~54.0
+- **Language:** TypeScript 5.7 (strict mode)
+- **Navigation:** React Navigation 7
 - **State:** Zustand
-- **HTTP:** Axios
+- **HTTP:** Axios with retry logic
 - **Storage:** Expo SecureStore
+- **Images:** expo-image-picker
+- **Notifications:** expo-notifications
 - **Icons:** Ionicons
+
+### DevOps
+- **CI/CD:** GitHub Actions
+- **Linting:** ESLint 9 (flat config)
+- **Type Checking:** TypeScript strict mode
+- **Security:** TruffleHog, Trivy, npm audit
+- **Containerization:** Docker
+- **Runtime Management:** mise
 
 ### Hosting (Recommended)
 - **Backend:** Railway ($5-20/month)
-- **Database:** Railway PostgreSQL
-- **Storage:** Cloudflare R2 (free tier)
+- **Database:** Railway PostgreSQL or Supabase
+- **Redis:** Upstash (free tier available)
+- **Storage:** Cloudflare R2 (10GB free)
 - **Mobile:** Expo EAS
+- **Monitoring:** Sentry (free tier available)
 
 ## 📊 Project Status
 
-**Current Status:** MVP Complete ✅
+**Current Status:** MVP 95% Complete ✅
 
 **Completed:**
-- ✅ Complete PRD documentation
+- ✅ Complete PRD documentation (7 comprehensive docs)
 - ✅ Backend API with all core features
 - ✅ Mobile app with full UI/UX
-- ✅ Authentication system
-- ✅ Point economy
-- ✅ Question creation and voting
-- ✅ User profiles
+- ✅ Image upload system (profile, questions, options)
+- ✅ Token refresh system
+- ✅ Profile management
+- ✅ Point economy with streaks
+- ✅ Daily challenges
+- ✅ Leaderboards
+- ✅ Topic expertise
+- ✅ CI/CD pipeline
+- ✅ Security scanning
+- ✅ Error tracking integration
 
-**Next Steps:**
-- [ ] Deploy backend to Railway
-- [ ] Deploy mobile app to Expo
-- [ ] Beta testing with real users
-- [ ] Gather feedback and iterate
-- [ ] Add image upload support
-- [ ] Implement push notifications
-- [ ] Add streak system and daily challenges
+**In Progress:**
+- 🔄 Password change UI (backend complete)
+- 🔄 Results export/sharing
+- 🔄 Final testing & polish
+
+**Next Steps:** (See [ROADMAP.md](./ROADMAP.md))
+- Beta testing with 40-50 users
+- App Store submission (iOS)
+- Google Play submission (Android)
+- Public launch preparation
 
 ## 🎨 Design System
 
