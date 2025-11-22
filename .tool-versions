@@ -1,0 +1,17 @@
+# Runtime versions for BeSure project
+# Managed by mise (https://mise.jdx.dev/)
+# Install mise: curl https://mise.run | sh
+
+# Node.js - used for backend API and mobile development
+nodejs 22.12.0
+
+# PostgreSQL - used for primary database
+# Note: For local development, you can also use Docker
+postgres 16.4
+
+# Redis - used for caching and session management
+# Note: For local development, you can also use Docker
+# redis 7.4.1
+
+# Optional: Python (if needed for scripts)
+# python 3.12.7
