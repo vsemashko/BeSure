@@ -4,6 +4,7 @@ import prisma from '../config/database';
 import config from '../config/constants';
 import { ValidationError, AuthenticationError, ConflictError } from '../utils/errors';
 import logger from '../utils/logger';
+import referralService from './referral.service';
 
 const SALT_ROUNDS = 10;
 
@@ -11,6 +12,7 @@ export interface RegisterInput {
   email: string;
   username: string;
   password: string;
+  referralCode?: string; // Optional referral code
 }
 
 export interface LoginInput {
@@ -99,6 +101,23 @@ class AuthService {
         createdAt: true,
       },
     });
+
+    // Generate referral code for new user
+    await referralService.createReferralCode(user.id);
+
+    // Apply referral code if provided
+    if (input.referralCode) {
+      try {
+        await referralService.applyReferralCode(user.id, input.referralCode);
+        logger.info(`User ${user.username} registered with referral code: ${input.referralCode}`);
+      } catch (error) {
+        // Log but don't fail registration if referral code is invalid
+        logger.warn(
+          `Failed to apply referral code ${input.referralCode} for user ${user.username}:`,
+          error
+        );
+      }
+    }
 
     // Log registration
     logger.info(`New user registered: ${user.username} (${user.email})`);

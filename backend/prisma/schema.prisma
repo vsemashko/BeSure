@@ -20,6 +20,8 @@ model User {
   email         String   @unique @db.VarChar(255)
   passwordHash  String   @db.VarChar(255)
   points        Int      @default(10) // Starting balance
+  referralCode  String   @unique @db.VarChar(20) // Unique referral code for this user
+  referredBy    String?  // User ID of referrer (nullable)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   profileData   Json?    // Avatar URL, bio, etc.
@@ -36,6 +38,8 @@ model User {
   topicExpertise     UserTopicExpertise[]
   following          UserFollow[]       @relation("UserFollowing")
   followers          UserFollow[]       @relation("UserFollowers")
+  referralsGiven     Referral[]         @relation("ReferralsGiven")
+  referralsReceived  Referral[]         @relation("ReferralsReceived")
 
   @@map("users")
 }
@@ -54,6 +58,27 @@ model UserFollow {
   @@index([followerId])
   @@index([followingId])
   @@map("user_follows")
+}
+
+// User referrals
+model Referral {
+  id            String   @id @default(uuid())
+  referrerId    String   // User who referred
+  referredId    String   // User who was referred
+  referralCode  String   @db.VarChar(20) // Code that was used
+  pointsAwarded Boolean  @default(false) // Whether referrer received points
+  createdAt     DateTime @default(now())
+  rewardedAt    DateTime? // When points were awarded
+
+  // Relations
+  referrer User @relation("ReferralsGiven", fields: [referrerId], references: [id], onDelete: Cascade)
+  referred User @relation("ReferralsReceived", fields: [referredId], references: [id], onDelete: Cascade)
+
+  @@unique([referredId]) // Each user can only be referred once
+  @@index([referrerId])
+  @@index([referralCode])
+  @@index([createdAt])
+  @@map("referrals")
 }
 
 // ============================================
