@@ -76,12 +76,20 @@ class AuthService {
     // Hash password
     const passwordHash = await bcrypt.hash(input.password, SALT_ROUNDS);
 
-    // Create user with point stats
+    // Generate unique referral code
+    const referralCodeChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let referralCode = '';
+    for (let i = 0; i < 8; i++) {
+      referralCode += referralCodeChars[Math.floor(Math.random() * referralCodeChars.length)];
+    }
+
+    // Create user with point stats and referral code
     const user = await prisma.user.create({
       data: {
         email: input.email,
         username: input.username,
         passwordHash,
+        referralCode,
         points: config.points.startingBalance,
         pointStats: {
           create: {
@@ -101,9 +109,6 @@ class AuthService {
         createdAt: true,
       },
     });
-
-    // Generate referral code for new user
-    await referralService.createReferralCode(user.id);
 
     // Apply referral code if provided
     if (input.referralCode) {
