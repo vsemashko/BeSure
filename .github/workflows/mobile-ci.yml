@@ -78,26 +78,33 @@ jobs:
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./mobile
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history for TruffleHog
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./mobile
+        run: npm ci
 
       - name: Run npm audit
+        working-directory: ./mobile
         run: npm audit --audit-level=moderate
         continue-on-error: true
 
       - name: Scan for secrets
         uses: trufflesecurity/trufflehog@main
         with:
-          path: ./mobile
-          base: main
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
           head: HEAD
+          extra_args: --only-verified
