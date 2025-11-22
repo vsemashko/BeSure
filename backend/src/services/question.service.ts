@@ -2,6 +2,7 @@ import prisma from '../config/database';
 import config from '../config/constants';
 import pointsService from './points.service';
 import topicService from './topic.service';
+import referralService from './referral.service';
 import {
   ValidationError,
   NotFoundError,
@@ -118,6 +119,17 @@ class QuestionService {
     // Auto-tag question with topics
     const questionText = `${input.title} ${input.description || ''}`;
     await topicService.autoTagQuestion(question.id, questionText);
+
+    // Check and reward referrals (if this is user's first question)
+    try {
+      const rewarded = await referralService.checkAndRewardReferral(input.userId);
+      if (rewarded) {
+        logger.info(`Referral reward processed for user ${input.userId}'s first question`);
+      }
+    } catch (error) {
+      logger.error('Error processing referral reward:', error);
+      // Don't fail question creation if referral check fails
+    }
 
     return this.formatQuestion(question);
   }
