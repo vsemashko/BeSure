@@ -18,8 +18,8 @@ class AnalyticsProvider {
    * Initialize PostHog
    */
   async initialize(): Promise<void> {
-    const apiKey = Constants.expoConfig?.extra?.posthogApiKey;
-    const host = Constants.expoConfig?.extra?.posthogHost || 'https://app.posthog.com';
+    const apiKey = Constants.expoConfig?.extra?.posthogApiKey as string | undefined;
+    const host = (Constants.expoConfig?.extra?.posthogHost as string | undefined) || 'https://app.posthog.com';
 
     if (!apiKey) {
       logger.info('ℹ️  PostHog API key not configured - analytics disabled');
@@ -27,25 +27,25 @@ class AnalyticsProvider {
     }
 
     try {
-      this.client = await PostHog.initAsync(apiKey, {
+      // Use direct constructor instead of initAsync for better type support
+      this.client = new PostHog(apiKey, {
         host,
-        // Capture screen views automatically
-        captureNativeAppLifecycleEvents: true,
-        // Capture device info
-        captureApplicationLifecycleEvents: true,
       });
 
       this.enabled = true;
       logger.info(`✓ PostHog analytics initialized (${host})`);
 
       // Set super properties (sent with every event)
-      this.client.group('app', {
-        app_version: Application.nativeApplicationVersion,
-        app_build: Application.nativeBuildVersion,
+      const locales = Localization.getLocales();
+      const calendars = Localization.getCalendars();
+
+      this.client.register({
+        app_version: Application.nativeApplicationVersion || 'unknown',
+        app_build: Application.nativeBuildVersion || 'unknown',
         platform: Platform.OS,
-        platform_version: Platform.Version,
-        locale: Localization.locale,
-        timezone: Localization.timezone,
+        platform_version: String(Platform.Version),
+        locale: locales[0]?.languageTag || 'unknown',
+        timezone: calendars[0]?.timeZone || 'unknown',
       });
     } catch (error) {
       logger.error('Failed to initialize PostHog:', error);
@@ -55,7 +55,7 @@ class AnalyticsProvider {
   /**
    * Track an event
    */
-  track(event: string, properties?: Record<string, unknown>): void {
+  track(event: string, properties?: Record<string, string | number | boolean | null>): void {
     if (!this.enabled || !this.client) return;
 
     try {
@@ -69,7 +69,7 @@ class AnalyticsProvider {
   /**
    * Identify a user
    */
-  identify(userId: string, properties?: Record<string, unknown>): void {
+  identify(userId: string, properties?: Record<string, string | number | boolean | null>): void {
     if (!this.enabled || !this.client) return;
 
     try {
@@ -84,7 +84,7 @@ class AnalyticsProvider {
   /**
    * Track screen view
    */
-  screen(screenName: string, properties?: Record<string, unknown>): void {
+  screen(screenName: string, properties?: Record<string, string | number | boolean | null>): void {
     this.track('$screen', {
       $screen_name: screenName,
       ...properties,
@@ -109,7 +109,7 @@ class AnalyticsProvider {
   /**
    * Set user properties
    */
-  setUserProperties(properties: Record<string, unknown>): void {
+  setUserProperties(properties: Record<string, string | number | boolean | null>): void {
     if (!this.enabled || !this.client || !this.currentUserId) return;
 
     try {
@@ -126,7 +126,8 @@ class AnalyticsProvider {
     if (!this.enabled || !this.client) return undefined;
 
     try {
-      return await this.client.getFeatureFlag(key);
+      const result = await this.client.getFeatureFlag(key);
+      return result ?? undefined;
     } catch (error) {
       logger.error('PostHog getFeatureFlag error:', error);
       return undefined;
@@ -140,7 +141,8 @@ class AnalyticsProvider {
     if (!this.enabled || !this.client) return false;
 
     try {
-      return await this.client.isFeatureEnabled(key);
+      const result = await this.client.isFeatureEnabled(key);
+      return result ?? false;
     } catch (error) {
       logger.error('PostHog isFeatureEnabled error:', error);
       return false;
@@ -149,7 +151,7 @@ class AnalyticsProvider {
 
   // Convenience methods for common events
 
-  trackSignup(method: string, properties?: Record<string, unknown>): void {
+  trackSignup(method: string, properties?: Record<string, string | number | boolean | null>): void {
     this.track('user_signed_up', {
       method,
       ...properties,
@@ -176,7 +178,11 @@ class AnalyticsProvider {
   }): void {
     this.track('question_created', {
       question_id: questionId,
-      ...properties,
+      option_count: properties.optionCount,
+      privacy_level: properties.privacyLevel,
+      is_anonymous: properties.isAnonymous,
+      is_urgent: properties.isUrgent,
+      has_images: properties.hasImages,
     });
   }
 
@@ -213,7 +219,7 @@ class AnalyticsProvider {
     });
   }
 
-  trackError(error: string, context?: Record<string, unknown>): void {
+  trackError(error: string, context?: Record<string, string | number | boolean | null>): void {
     this.track('error_occurred', {
       error_message: error,
       ...context,
