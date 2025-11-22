@@ -9,15 +9,19 @@ import {
   Platform,
   Alert,
   TouchableOpacity,
+  Image,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Card } from '../components/Card';
-import { questionApi } from '../api';
+import { questionApi, uploadApi } from '../api';
 import { useAuthStore } from '../store/authStore';
 import { colors, typography, spacing, borderRadius } from '../theme';
+import logger from '../utils/logger';
 
 const EXPIRATION_OPTIONS = [
   { label: '30 minutes', minutes: 30 },
@@ -35,6 +39,10 @@ export function CreateQuestionScreen() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [options, setOptions] = useState<string[]>(['', '']);
+  const [optionImages, setOptionImages] = useState<(string | null)[]>([null, null]);
+  const [questionImage, setQuestionImage] = useState<string | null>(null);
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+  const [isUploadingQuestion, setIsUploadingQuestion] = useState(false);
   const [expiresInMinutes, setExpiresInMinutes] = useState(1440); // 24 hours default
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -52,12 +60,14 @@ export function CreateQuestionScreen() {
   const addOption = () => {
     if (options.length < 6) {
       setOptions([...options, '']);
+      setOptionImages([...optionImages, null]);
     }
   };
 
   const removeOption = (index: number) => {
     if (options.length > 2) {
       setOptions(options.filter((_, i) => i !== index));
+      setOptionImages(optionImages.filter((_, i) => i !== index));
     }
   };
 
@@ -65,6 +75,88 @@ export function CreateQuestionScreen() {
     const newOptions = [...options];
     newOptions[index] = value;
     setOptions(newOptions);
+  };
+
+  const pickQuestionImage = async () => {
+    try {
+      const { status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Please grant camera roll permissions to upload images.');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        await uploadQuestionImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      logger.error('Failed to pick question image', error);
+      Alert.alert('Error', 'Failed to pick image. Please try again.');
+    }
+  };
+
+  const uploadQuestionImage = async (imageUri: string) => {
+    try {
+      setIsUploadingQuestion(true);
+      const uploadResult = await uploadApi.uploadQuestionImage(imageUri);
+      setQuestionImage(uploadResult.url);
+    } catch (error) {
+      logger.error('Failed to upload question image', error);
+      Alert.alert('Error', 'Failed to upload image. Please try again.');
+    } finally {
+      setIsUploadingQuestion(false);
+    }
+  };
+
+  const pickOptionImage = async (index: number) => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Please grant camera roll permissions to upload images.');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        await uploadOptionImage(index, result.assets[0].uri);
+      }
+    } catch (error) {
+      logger.error('Failed to pick option image', error);
+      Alert.alert('Error', 'Failed to pick image. Please try again.');
+    }
+  };
+
+  const uploadOptionImage = async (index: number, imageUri: string) => {
+    try {
+      setUploadingIndex(index);
+      const uploadResult = await uploadApi.uploadOptionImage(imageUri);
+
+      const newOptionImages = [...optionImages];
+      newOptionImages[index] = uploadResult.url;
+      setOptionImages(newOptionImages);
+    } catch (error) {
+      logger.error('Failed to upload option image', error);
+      Alert.alert('Error', 'Failed to upload image. Please try again.');
+    } finally {
+      setUploadingIndex(null);
+    }
+  };
+
+  const removeOptionImage = (index: number) => {
+    const newOptionImages = [...optionImages];
+    newOptionImages[index] = null;
+    setOptionImages(newOptionImages);
   };
 
   const validate = () => {
@@ -107,11 +199,15 @@ export function CreateQuestionScreen() {
 
       const validOptions = options
         .filter((opt) => opt.trim())
-        .map((opt) => ({ content: opt.trim() }));
+        .map((opt, index) => ({
+          content: opt.trim(),
+          imageUrl: optionImages[index] || undefined,
+        }));
 
       await questionApi.create({
         title: title.trim(),
         description: description.trim() || undefined,
+        imageUrl: questionImage || undefined,
         options: validOptions,
         expiresInMinutes,
         isAnonymous,
@@ -181,6 +277,37 @@ export function CreateQuestionScreen() {
             numberOfLines={3}
           />
 
+          {/* Question Image (Optional) */}
+          <View style={styles.imageSection}>
+            <Text style={styles.sectionTitle}>Question Image (Optional)</Text>
+            {questionImage ? (
+              <View style={styles.imagePreview}>
+                <Image source={{ uri: questionImage }} style={styles.questionImagePreview} />
+                <TouchableOpacity
+                  style={styles.removeImageButton}
+                  onPress={() => setQuestionImage(null)}
+                >
+                  <Ionicons name="close-circle" size={24} color={colors.error} />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={styles.addImageButton}
+                onPress={pickQuestionImage}
+                disabled={isUploadingQuestion}
+              >
+                {isUploadingQuestion ? (
+                  <ActivityIndicator size="small" color={colors.primary} />
+                ) : (
+                  <>
+                    <Ionicons name="image-outline" size={24} color={colors.primary} />
+                    <Text style={styles.addImageText}>Add Image</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
+
           {/* Options */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>
@@ -189,21 +316,51 @@ export function CreateQuestionScreen() {
             {errors.options && <Text style={styles.errorText}>{errors.options}</Text>}
 
             {options.map((option, index) => (
-              <View key={index} style={styles.optionRow}>
-                <Input
-                  placeholder={`Option ${index + 1}`}
-                  value={option}
-                  onChangeText={(value) => updateOption(index, value)}
-                  error={errors[`option${index}`]}
-                  containerStyle={styles.optionInput}
-                  maxLength={200}
-                />
-                {options.length > 2 && (
+              <View key={index} style={styles.optionContainer}>
+                <View style={styles.optionRow}>
+                  <Input
+                    placeholder={`Option ${index + 1}`}
+                    value={option}
+                    onChangeText={(value) => updateOption(index, value)}
+                    error={errors[`option${index}`]}
+                    containerStyle={styles.optionInput}
+                    maxLength={200}
+                  />
+                  {options.length > 2 && (
+                    <TouchableOpacity
+                      style={styles.removeButton}
+                      onPress={() => removeOption(index)}
+                    >
+                      <Ionicons name="close-circle" size={24} color={colors.error} />
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                {/* Option Image */}
+                {optionImages[index] ? (
+                  <View style={styles.optionImagePreview}>
+                    <Image source={{ uri: optionImages[index]! }} style={styles.optionImage} />
+                    <TouchableOpacity
+                      style={styles.removeOptionImageButton}
+                      onPress={() => removeOptionImage(index)}
+                    >
+                      <Ionicons name="close-circle" size={20} color={colors.error} />
+                    </TouchableOpacity>
+                  </View>
+                ) : (
                   <TouchableOpacity
-                    style={styles.removeButton}
-                    onPress={() => removeOption(index)}
+                    style={styles.addOptionImageButton}
+                    onPress={() => pickOptionImage(index)}
+                    disabled={uploadingIndex === index}
                   >
-                    <Ionicons name="close-circle" size={24} color={colors.error} />
+                    {uploadingIndex === index ? (
+                      <ActivityIndicator size="small" color={colors.primary} />
+                    ) : (
+                      <>
+                        <Ionicons name="image-outline" size={20} color={colors.textSecondary} />
+                        <Text style={styles.addOptionImageText}>Add image</Text>
+                      </>
+                    )}
                   </TouchableOpacity>
                 )}
               </View>
@@ -353,6 +510,45 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     marginBottom: spacing.md,
   },
+  imageSection: {
+    marginBottom: spacing.xl,
+  },
+  imagePreview: {
+    position: 'relative',
+    alignSelf: 'flex-start',
+  },
+  questionImagePreview: {
+    width: 300,
+    height: 200,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.lightGray,
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: colors.white,
+    borderRadius: 12,
+  },
+  addImageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    padding: spacing.md,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    borderWidth: 2,
+    borderColor: colors.lightGray,
+    borderStyle: 'dashed',
+  },
+  addImageText: {
+    fontSize: typography.fontSize.body,
+    color: colors.primary,
+    fontWeight: typography.fontWeight.semiBold,
+  },
+  optionContainer: {
+    marginBottom: spacing.md,
+  },
   optionRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -363,6 +559,41 @@ const styles = StyleSheet.create({
   },
   removeButton: {
     marginTop: spacing.md,
+  },
+  optionImagePreview: {
+    position: 'relative',
+    marginTop: spacing.sm,
+    alignSelf: 'flex-start',
+  },
+  optionImage: {
+    width: 100,
+    height: 100,
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.lightGray,
+  },
+  removeOptionImageButton: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    backgroundColor: colors.white,
+    borderRadius: 10,
+  },
+  addOptionImageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.lightGray,
+    marginTop: spacing.sm,
+    alignSelf: 'flex-start',
+  },
+  addOptionImageText: {
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.textSecondary,
   },
   errorText: {
     fontSize: typography.fontSize.caption,

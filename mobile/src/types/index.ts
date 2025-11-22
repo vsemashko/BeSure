@@ -112,6 +112,7 @@ export type FeedMode = 'urgent' | 'popular' | 'foryou';
 export interface CreateQuestionInput {
   title: string;
   description?: string;
+  imageUrl?: string;
   options: Array<{
     content: string;
     imageUrl?: string;
