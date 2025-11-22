@@ -28,6 +28,7 @@
     "prepare": "prisma generate",
     "deploy:railway": "../scripts/deploy-railway.sh",
     "deploy:render": "../scripts/deploy-render.sh",
+    "deploy:staging": "../scripts/quick-deploy-staging.sh",
     "db:migrate:prod": "../scripts/migrate-production.sh",
     "db:backup": "../scripts/backup-db.sh",
     "deploy:health": "../scripts/health-check.sh",
