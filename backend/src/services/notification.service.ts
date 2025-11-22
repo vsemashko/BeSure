@@ -20,6 +20,8 @@ interface NotificationPreferences {
   questionExpiring: boolean;
   newVotes: boolean;
   expertiseLevelUp: boolean;
+  socialUpdates: boolean;
+  questionUpdates: boolean;
 }
 
 class NotificationService {
@@ -82,6 +84,8 @@ class NotificationService {
       questionExpiring: prefs.questionExpiring !== false,
       newVotes: prefs.newVotes !== false,
       expertiseLevelUp: prefs.expertiseLevelUp !== false,
+      socialUpdates: prefs.socialUpdates !== false,
+      questionUpdates: prefs.questionUpdates !== false,
     };
   }
 
@@ -272,6 +276,71 @@ class NotificationService {
       title: `🎓 You're now ${level} in ${topicName}!`,
       body: `Keep voting to reach the next level.`,
       data: { type: 'expertise_level_up', topicName, level },
+    });
+  }
+
+  /**
+   * Notify user about new follower
+   */
+  async sendNewFollowerNotification(
+    userId: string,
+    followerId: string,
+    followerUsername: string
+  ): Promise<void> {
+    const prefs = await this.getPreferences(userId);
+    if (!prefs.socialUpdates) return;
+
+    await this.sendPushNotification({
+      userId,
+      title: '👥 New follower!',
+      body: `${followerUsername} started following you`,
+      data: { type: 'new_follower', followerId },
+    });
+  }
+
+  /**
+   * Notify user when their question is answered
+   */
+  async sendQuestionAnsweredNotification(
+    userId: string,
+    questionId: string,
+    questionText: string,
+    answerText: string
+  ): Promise<void> {
+    const prefs = await this.getPreferences(userId);
+    if (!prefs.questionUpdates) return;
+
+    await this.sendPushNotification({
+      userId,
+      title: '✅ Your question was answered!',
+      body: `"${questionText}" - Answer: ${answerText}`,
+      data: { type: 'question_answered', questionId },
+    });
+  }
+
+  /**
+   * Notify user when a friend posts a question
+   */
+  async sendFriendQuestionNotification(
+    userId: string,
+    friendId: string,
+    friendUsername: string,
+    questionId: string,
+    questionText: string
+  ): Promise<void> {
+    const prefs = await this.getPreferences(userId);
+    if (!prefs.socialUpdates) return;
+
+    const truncatedText =
+      questionText.length > 100
+        ? questionText.substring(0, 100) + '...'
+        : questionText;
+
+    await this.sendPushNotification({
+      userId,
+      title: `📝 ${friendUsername} asked a question`,
+      body: truncatedText,
+      data: { type: 'friend_question', questionId, friendId },
     });
   }
 }

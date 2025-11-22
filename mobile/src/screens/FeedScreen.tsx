@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { QuestionCard } from '../components/QuestionCard';
 import { useAuthStore } from '../store/authStore';
 import { questionApi } from '../api';
@@ -107,8 +108,16 @@ export function FeedScreen() {
     <View style={styles.header}>
       <View style={styles.titleRow}>
         <Text style={styles.title}>BeSure</Text>
-        <View style={styles.pointsBadge}>
-          <Text style={styles.pointsText}>{user?.points || 0} pts</Text>
+        <View style={styles.headerRight}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Notifications' as never)}
+            style={styles.notificationButton}
+          >
+            <Ionicons name="notifications-outline" size={24} color={colors.textPrimary} />
+          </TouchableOpacity>
+          <View style={styles.pointsBadge}>
+            <Text style={styles.pointsText}>{user?.points || 0} pts</Text>
+          </View>
         </View>
       </View>
 
@@ -223,6 +232,14 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.h1,
     fontWeight: typography.fontWeight.bold,
     color: colors.textPrimary,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  notificationButton: {
+    padding: spacing.xs,
   },
   pointsBadge: {
     paddingHorizontal: spacing.md,

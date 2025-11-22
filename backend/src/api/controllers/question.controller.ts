@@ -1,7 +1,10 @@
 import { Request, Response } from 'express';
 import questionService from '../../services/question.service';
+import notificationService from '../../services/notification.service';
+import socialService from '../../services/social.service';
 import { sendSuccess } from '../../utils/helpers';
 import { asyncHandler } from '../middleware/errorHandler';
+import logger from '../../utils/logger';
 
 class QuestionController {
   /**
@@ -10,6 +13,7 @@ class QuestionController {
    */
   create = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
+    const username = req.user!.username;
     const {
       title,
       description,
@@ -28,6 +32,39 @@ class QuestionController {
       isAnonymous: isAnonymous || false,
       privacyLevel: privacyLevel || 'public',
     });
+
+    // Notify followers about the new question (if not anonymous and public)
+    if (!isAnonymous && privacyLevel === 'public') {
+      // Get followers and notify them asynchronously (don't block response)
+      socialService
+        .getFollowers(userId, { limit: 1000, offset: 0 })
+        .then(async (result) => {
+          const notificationPromises = result.followers.map((follower) =>
+            notificationService
+              .sendFriendQuestionNotification(
+                follower.id,
+                userId,
+                username,
+                question.id,
+                title
+              )
+              .catch((err) =>
+                logger.error(
+                  `Failed to send friend question notification to ${follower.id}`,
+                  err
+                )
+              )
+          );
+
+          await Promise.all(notificationPromises);
+          logger.info(
+            `Sent friend question notifications to ${result.followers.length} followers`
+          );
+        })
+        .catch((err) =>
+          logger.error('Failed to get followers for notification', err)
+        );
+    }
 
     return sendSuccess(res, question, 201);
   });

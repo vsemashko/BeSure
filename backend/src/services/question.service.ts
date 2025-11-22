@@ -276,7 +276,7 @@ class QuestionService {
   async closeExpiredQuestions(): Promise<number> {
     const now = new Date();
 
-    // Find expired questions
+    // Find expired questions with details
     const expiredQuestions = await prisma.question.findMany({
       where: {
         status: 'active',
@@ -284,7 +284,15 @@ class QuestionService {
           lte: now,
         },
       },
-      select: { id: true },
+      include: {
+        options: {
+          include: {
+            _count: {
+              select: { votes: true },
+            },
+          },
+        },
+      },
     });
 
     if (expiredQuestions.length === 0) {
@@ -301,6 +309,34 @@ class QuestionService {
 
         // Award completion rewards
         await pointsService.awardQuestionCompletionRewards(question.id);
+
+        // Determine the winning option (most votes)
+        if (question.options.length > 0) {
+          const sortedOptions = question.options.sort(
+            (a, b) => b._count.votes - a._count.votes
+          );
+          const winningOption = sortedOptions[0];
+
+          // Send notification if there were any votes
+          if (winningOption._count.votes > 0) {
+            const notificationService = (
+              await import('./notification.service')
+            ).default;
+            await notificationService
+              .sendQuestionAnsweredNotification(
+                question.userId,
+                question.id,
+                question.title,
+                winningOption.content
+              )
+              .catch((err) =>
+                logger.error(
+                  `Failed to send question answered notification for ${question.id}`,
+                  err
+                )
+              );
+          }
+        }
       } catch (error) {
         logger.error(`Failed to close question ${question.id}:`, error);
       }

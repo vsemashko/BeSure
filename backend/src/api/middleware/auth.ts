@@ -13,7 +13,7 @@ export interface JwtPayload {
 declare global {
   namespace Express {
     interface Request {
-      user?: JwtPayload & { id: string };
+      user?: JwtPayload & { id: string; username: string };
     }
   }
 }
@@ -57,6 +57,7 @@ export const authenticate = async (
     req.user = {
       ...decoded,
       id: user.id,
+      username: user.username,
     };
 
     next();
@@ -84,7 +85,16 @@ export const optionalAuth = async (
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
       const decoded = jwt.verify(token, config.jwtSecret) as JwtPayload;
-      req.user = { ...decoded, id: decoded.userId };
+
+      // Fetch user to get username
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.userId },
+        select: { id: true, username: true },
+      });
+
+      if (user) {
+        req.user = { ...decoded, id: user.id, username: user.username };
+      }
     }
     next();
   } catch (error) {

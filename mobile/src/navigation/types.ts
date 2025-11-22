@@ -18,6 +18,7 @@ export type RootStackParamList = {
   ChangePassword: undefined;
   Followers: { userId: string; username?: string };
   Following: { userId: string; username?: string };
+  Notifications: undefined;
 };
 
 export type MainTabParamList = {

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import socialService from '../../services/social.service';
+import notificationService from '../../services/notification.service';
 import logger from '../../utils/logger';
 
 class SocialController {
@@ -10,11 +11,19 @@ class SocialController {
   async followUser(req: Request, res: Response, next: NextFunction) {
     try {
       const followerId = req.user!.id;
+      const followerUsername = req.user!.username;
       const { userId } = req.params;
 
       const result = await socialService.followUser(followerId, userId);
 
       logger.info(`User ${followerId} followed user ${userId}`);
+
+      // Send notification to the followed user
+      await notificationService
+        .sendNewFollowerNotification(userId, followerId, followerUsername)
+        .catch((err) =>
+          logger.error('Failed to send new follower notification', err)
+        );
 
       res.json({
         success: true,
