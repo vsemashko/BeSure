@@ -206,6 +206,17 @@ export function EditProfileScreen({ navigation }: any) {
           disabled={isSaving || isUploading}
           style={styles.saveButton}
         />
+
+        {/* Change Password Button */}
+        <TouchableOpacity
+          style={styles.changePasswordButton}
+          onPress={() => navigation.navigate('ChangePassword' as never)}
+          disabled={isSaving || isUploading}
+        >
+          <Ionicons name="lock-closed-outline" size={20} color={colors.primary} />
+          <Text style={styles.changePasswordText}>Change Password</Text>
+          <Ionicons name="chevron-forward" size={20} color={colors.mediumGray} />
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -299,5 +310,23 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     marginTop: spacing.xl,
+  },
+  changePasswordButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginTop: spacing.md,
+  },
+  changePasswordText: {
+    flex: 1,
+    fontSize: typography.fontSize.body,
+    fontWeight: '600',
+    color: colors.primary,
+    marginLeft: spacing.sm,
   },
 });

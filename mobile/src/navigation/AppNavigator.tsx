@@ -17,6 +17,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 import CreateQuestionScreen from '../screens/CreateQuestionScreen';
 import QuestionDetailScreen from '../screens/QuestionDetailScreen';
 import { EditProfileScreen } from '../screens/EditProfileScreen';
+import { ChangePasswordScreen } from '../screens/ChangePasswordScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -110,6 +111,13 @@ export function AppNavigator() {
             <Stack.Screen
               name="EditProfile"
               component={EditProfileScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="ChangePassword"
+              component={ChangePasswordScreen}
               options={{
                 headerShown: false,
               }}
