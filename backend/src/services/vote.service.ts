@@ -3,6 +3,7 @@ import pointsService from './points.service';
 import streakService from './streak.service';
 import challengeService from './challenge.service';
 import topicService from './topic.service';
+import analytics from './analytics-tracking.service';
 import { ValidationError, NotFoundError, ConflictError } from '../utils/errors';
 import logger from '../utils/logger';
 
@@ -79,6 +80,12 @@ class VoteService {
           ? ` - Expertise updated: ${topicUpdate.map((t) => t.topicName).join(', ')}`
           : '')
     );
+
+    // Track vote in analytics
+    analytics.trackVote(userId, questionId, {
+      optionId,
+      pointsEarned: pointsResult.totalPoints,
+    });
 
     return {
       vote: result.vote,

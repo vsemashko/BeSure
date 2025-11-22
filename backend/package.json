@@ -62,6 +62,7 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "multer": "^2.0.2",
+    "posthog-node": "^5.13.2",
     "sharp": "^0.33.5",
     "socket.io": "^4.8.1",
     "winston": "^3.17.0"

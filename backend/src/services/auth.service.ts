@@ -5,6 +5,7 @@ import config from '../config/constants';
 import { ValidationError, AuthenticationError, ConflictError } from '../utils/errors';
 import logger from '../utils/logger';
 import referralService from './referral.service';
+import analytics from './analytics-tracking.service';
 
 const SALT_ROUNDS = 10;
 
@@ -127,6 +128,21 @@ class AuthService {
     // Log registration
     logger.info(`New user registered: ${user.username} (${user.email})`);
 
+    // Track signup in analytics
+    analytics.trackSignup(user.id, {
+      username: user.username,
+      has_referral_code: !!input.referralCode,
+      signup_method: 'email',
+    });
+
+    // Identify user in analytics
+    analytics.identify(user.id, {
+      email: user.email,
+      username: user.username,
+      signup_date: user.createdAt.toISOString(),
+      starting_points: config.points.startingBalance,
+    });
+
     // Generate tokens
     const { token, refreshToken } = this.generateTokens(user.id, user.email);
 
@@ -171,6 +187,9 @@ class AuthService {
     const { passwordHash, ...userWithoutPassword } = user;
 
     logger.info(`User logged in: ${user.username} (${user.email})`);
+
+    // Track login in analytics
+    analytics.trackLogin(user.id);
 
     return {
       user: userWithoutPassword,

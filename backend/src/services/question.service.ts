@@ -3,6 +3,7 @@ import config from '../config/constants';
 import pointsService from './points.service';
 import topicService from './topic.service';
 import referralService from './referral.service';
+import analytics from './analytics-tracking.service';
 import {
   ValidationError,
   NotFoundError,
@@ -115,6 +116,16 @@ class QuestionService {
     logger.info(
       `Question created: ${question.id} by user ${input.userId} (cost: ${cost} points)`
     );
+
+    // Track question creation in analytics
+    analytics.trackQuestionCreated(input.userId, question.id, {
+      optionCount: input.options.length,
+      privacyLevel: input.privacyLevel,
+      isAnonymous: input.isAnonymous,
+      isUrgent,
+      hasImages: input.options.some(opt => !!opt.imageUrl),
+      expiresIn: input.expiresInMinutes,
+    });
 
     // Auto-tag question with topics
     const questionText = `${input.title} ${input.description || ''}`;
