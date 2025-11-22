@@ -23,6 +23,7 @@ import { FollowingScreen } from '../screens/FollowingScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { NotificationPreferencesScreen } from '../screens/NotificationPreferencesScreen';
 import { SearchScreen } from '../screens/SearchScreen';
+import { TemplatesScreen } from '../screens/TemplatesScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -160,6 +161,13 @@ export function AppNavigator() {
             <Stack.Screen
               name="NotificationPreferences"
               component={NotificationPreferencesScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="Templates"
+              component={TemplatesScreen}
               options={{
                 headerShown: false,
               }}

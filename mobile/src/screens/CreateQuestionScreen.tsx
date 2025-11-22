@@ -256,6 +256,16 @@ export function CreateQuestionScreen() {
             </View>
           </View>
 
+          {/* Template Button */}
+          <TouchableOpacity
+            style={styles.templateButton}
+            onPress={() => navigation.navigate('Templates' as never)}
+          >
+            <Ionicons name="albums-outline" size={20} color={colors.primary} />
+            <Text style={styles.templateButtonText}>Browse Templates</Text>
+            <Ionicons name="chevron-forward" size={20} color={colors.primary} />
+          </TouchableOpacity>
+
           {/* Question Title */}
           <Input
             label="Question Title"
@@ -500,6 +510,26 @@ const styles = StyleSheet.create({
   pointsBalance: {
     fontSize: typography.fontSize.bodySmall,
     color: colors.textSecondary,
+  },
+  templateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primaryLight,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.xl,
+    borderWidth: 1,
+    borderColor: colors.primary + '40',
+    gap: spacing.sm,
+  },
+  templateButtonText: {
+    fontSize: typography.fontSize.body,
+    fontWeight: typography.fontWeight.semiBold,
+    color: colors.primary,
+    flex: 1,
+    textAlign: 'center',
   },
   section: {
     marginBottom: spacing.xl,

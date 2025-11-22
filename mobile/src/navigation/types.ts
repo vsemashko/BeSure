@@ -20,6 +20,7 @@ export type RootStackParamList = {
   Following: { userId: string; username?: string };
   Notifications: undefined;
   NotificationPreferences: undefined;
+  Templates: undefined;
 };
 
 export type MainTabParamList = {
