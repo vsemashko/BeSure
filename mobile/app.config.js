@@ -35,6 +35,8 @@ export default {
       apiUrl: process.env.API_URL || 'http://localhost:3000/api/v1',
       expoProjectId: process.env.EXPO_PROJECT_ID,
       sentryDsn: process.env.SENTRY_DSN,
+      posthogApiKey: process.env.POSTHOG_API_KEY,
+      posthogHost: process.env.POSTHOG_HOST || 'https://app.posthog.com',
       eas: {
         projectId: process.env.EXPO_PROJECT_ID,
       },

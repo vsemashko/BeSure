@@ -93,7 +93,7 @@ export const calculatePagination = (
  * Sanitize user object (remove sensitive fields)
  */
 export const sanitizeUser = (user: any) => {
-  const { passwordHash, ...sanitized } = user;
+  const { passwordHash: _passwordHash, ...sanitized } = user;
   return sanitized;
 };
 

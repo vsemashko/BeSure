@@ -59,10 +59,10 @@ echo ""
 # Test 2: Authentication Flow
 echo -e "${YELLOW}2. Authentication Tests${NC}"
 
-# Generate random test user
+# Generate random test user credentials (ephemeral, not stored)
 TEST_USERNAME="test_$(date +%s)_$RANDOM"
 TEST_EMAIL="${TEST_USERNAME}@test.besure.com"
-TEST_PASSWORD="TestPass123!@#"
+TEST_PASSWORD="TestPassword123"  # Temporary password for smoke test only
 
 # Register new user
 echo -n "Testing user registration... "

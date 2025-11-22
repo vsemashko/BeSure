@@ -184,7 +184,7 @@ class AuthService {
     const { token, refreshToken } = this.generateTokens(user.id, user.email);
 
     // Remove password hash from response
-    const { passwordHash, ...userWithoutPassword } = user;
+    const { passwordHash: _passwordHash, ...userWithoutPassword } = user;
 
     logger.info(`User logged in: ${user.username} (${user.email})`);
 
