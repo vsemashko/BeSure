@@ -9,6 +9,7 @@ import notificationRoutes from './notification.routes';
 import socialRoutes from './social.routes';
 import leaderboardRoutes from './leaderboard.routes';
 import uploadRoutes from './upload.routes';
+import analyticsRoutes from './analytics.routes';
 
 const router = Router();
 
@@ -35,6 +36,7 @@ router.use('/notifications', notificationRoutes);
 router.use('/social', socialRoutes);
 router.use('/leaderboard', leaderboardRoutes);
 router.use('/upload', uploadRoutes);
+router.use('/analytics', analyticsRoutes);
 
 // Future routes:
 // router.use('/users', userRoutes);

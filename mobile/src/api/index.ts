@@ -8,3 +8,4 @@ export { default as topicApi } from './topics';
 export { default as socialApi } from './social';
 export { default as leaderboardApi } from './leaderboard';
 export { uploadApi } from './upload';
+export { default as analyticsApi } from './analytics';

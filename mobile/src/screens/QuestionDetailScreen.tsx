@@ -189,6 +189,22 @@ Vote on this and more at BeSure! 🎯
               {question.totalVotes} {question.totalVotes === 1 ? 'vote' : 'votes'}
             </Text>
           </View>
+
+          {/* View Insights Button - only for question creator */}
+          {question.user?.id === user?.id && question.totalVotes > 0 && (
+            <TouchableOpacity
+              style={styles.insightsButton}
+              onPress={() =>
+                navigation.navigate('QuestionInsights' as never, {
+                  questionId: question.id,
+                } as never)
+              }
+            >
+              <Ionicons name="analytics" size={20} color={colors.primary} />
+              <Text style={styles.insightsButtonText}>View Insights</Text>
+              <Ionicons name="chevron-forward" size={20} color={colors.primary} />
+            </TouchableOpacity>
+          )}
         </Card>
 
         {/* Options */}
@@ -370,6 +386,24 @@ const styles = StyleSheet.create({
   voteCountText: {
     fontSize: typography.fontSize.body,
     color: colors.mediumGray,
+  },
+  insightsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primaryLight,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.md,
+    marginTop: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.primary + '40',
+    gap: spacing.sm,
+  },
+  insightsButtonText: {
+    fontSize: typography.fontSize.body,
+    fontWeight: typography.fontWeight.semiBold,
+    color: colors.primary,
   },
   optionsContainer: {
     marginBottom: spacing.lg,

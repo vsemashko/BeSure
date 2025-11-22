@@ -24,6 +24,7 @@ import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { NotificationPreferencesScreen } from '../screens/NotificationPreferencesScreen';
 import { SearchScreen } from '../screens/SearchScreen';
 import { TemplatesScreen } from '../screens/TemplatesScreen';
+import { QuestionInsightsScreen } from '../screens/QuestionInsightsScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -170,6 +171,15 @@ export function AppNavigator() {
               component={TemplatesScreen}
               options={{
                 headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="QuestionInsights"
+              component={QuestionInsightsScreen}
+              options={{
+                headerShown: true,
+                headerTitle: 'Question Insights',
+                headerBackTitle: 'Back',
               }}
             />
           </>
