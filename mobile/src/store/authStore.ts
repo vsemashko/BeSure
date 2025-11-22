@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { authApi } from '../api';
 import type { User } from '../types';
+import logger from '../utils/logger';
 
 interface AuthState {
   user: User | null;
@@ -26,13 +27,23 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (email: string, password: string) => {
     try {
       set({ isLoading: true, error: null });
+      logger.logUserAction('login_attempt', { email });
+
       const response = await authApi.login({ email, password });
+
+      logger.logUserAction('login_success', {
+        userId: response.user.id,
+        username: response.user.username,
+      });
+
       set({
         user: response.user,
         isAuthenticated: true,
         isLoading: false,
       });
     } catch (error: any) {
+      logger.logUserAction('login_failure', { email, error: error.message });
+
       set({
         error: error.message || 'Login failed',
         isLoading: false,
@@ -44,13 +55,23 @@ export const useAuthStore = create<AuthState>((set) => ({
   register: async (email: string, username: string, password: string) => {
     try {
       set({ isLoading: true, error: null });
+      logger.logUserAction('register_attempt', { email, username });
+
       const response = await authApi.register({ email, username, password });
+
+      logger.logUserAction('register_success', {
+        userId: response.user.id,
+        username: response.user.username,
+      });
+
       set({
         user: response.user,
         isAuthenticated: true,
         isLoading: false,
       });
     } catch (error: any) {
+      logger.logUserAction('register_failure', { email, username, error: error.message });
+
       set({
         error: error.message || 'Registration failed',
         isLoading: false,
@@ -61,7 +82,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     try {
+      logger.logUserAction('logout_attempt');
       await authApi.logout();
+      logger.logUserAction('logout_success');
     } finally {
       set({
         user: null,

@@ -87,9 +87,55 @@ class Logger {
     this.error(`[API Error] ${method} ${url}`, error);
   }
 
-  // User action logging
+  // User action logging with breadcrumbs
   logUserAction(action: string, details?: any) {
     this.info(`[User Action] ${action}`, details);
+
+    // Add Sentry breadcrumb for user actions
+    Sentry.addBreadcrumb({
+      category: 'user.action',
+      message: action,
+      level: 'info',
+      data: details,
+    });
+  }
+
+  // Navigation logging with breadcrumbs
+  logNavigation(from: string, to: string, params?: any) {
+    this.info(`[Navigation] ${from} -> ${to}`, params);
+
+    Sentry.addBreadcrumb({
+      category: 'navigation',
+      message: `${from} -> ${to}`,
+      level: 'info',
+      data: params,
+    });
+  }
+
+  // UI event logging with breadcrumbs
+  logUIEvent(event: string, component: string, data?: any) {
+    this.debug(`[UI Event] ${component}.${event}`, data);
+
+    Sentry.addBreadcrumb({
+      category: 'ui.event',
+      message: `${component}.${event}`,
+      level: 'debug',
+      data,
+    });
+  }
+
+  // API call logging with breadcrumbs
+  logAPICall(method: string, endpoint: string, status?: number) {
+    Sentry.addBreadcrumb({
+      category: 'http',
+      message: `${method} ${endpoint}`,
+      level: status && status >= 400 ? 'warning' : 'info',
+      data: {
+        method,
+        url: endpoint,
+        status_code: status,
+      },
+    });
   }
 
   // Performance logging
@@ -97,6 +143,34 @@ class Logger {
     if (isDevelopment) {
       this.debug(`[Performance] ${metric}: ${duration}ms`);
     }
+
+    // Add breadcrumb for slow operations (> 1 second)
+    if (duration > 1000) {
+      Sentry.addBreadcrumb({
+        category: 'performance',
+        message: `Slow operation: ${metric}`,
+        level: 'warning',
+        data: {
+          metric,
+          duration_ms: duration,
+        },
+      });
+    }
+  }
+
+  // State change logging with breadcrumbs
+  logStateChange(stateName: string, oldValue: any, newValue: any) {
+    this.debug(`[State Change] ${stateName}`, { from: oldValue, to: newValue });
+
+    Sentry.addBreadcrumb({
+      category: 'state',
+      message: `${stateName} changed`,
+      level: 'debug',
+      data: {
+        from: oldValue,
+        to: newValue,
+      },
+    });
   }
 }
 

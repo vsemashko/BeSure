@@ -94,11 +94,13 @@ class ApiClient {
     // Response interceptor for error handling
     this.client.interceptors.response.use(
       (response) => {
-        logger.logResponse(
-          response.config.method?.toUpperCase() || 'GET',
-          response.config.url || '',
-          response.status
-        );
+        const method = response.config.method?.toUpperCase() || 'GET';
+        const url = response.config.url || '';
+        const status = response.status;
+
+        logger.logResponse(method, url, status);
+        logger.logAPICall(method, url, status);
+
         return response;
       },
       async (error: AxiosError) => {
@@ -106,11 +108,12 @@ class ApiClient {
           _retry?: boolean;
         };
 
-        logger.logError(
-          originalRequest.method?.toUpperCase() || 'GET',
-          originalRequest.url || '',
-          error
-        );
+        const method = originalRequest.method?.toUpperCase() || 'GET';
+        const url = originalRequest.url || '';
+        const status = error.response?.status;
+
+        logger.logError(method, url, error);
+        logger.logAPICall(method, url, status);
 
         // Handle 401 Unauthorized - attempt token refresh
         if (error.response?.status === 401 && !originalRequest._retry) {
