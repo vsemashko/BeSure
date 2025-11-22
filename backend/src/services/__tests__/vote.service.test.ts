@@ -64,6 +64,10 @@ describe('VoteService', () => {
         userId: 'other-user',
         status: 'active',
         expiresAt: new Date(Date.now() + 3600000),
+        options: [
+          { id: 'option-123', content: 'Option 1' },
+          { id: 'option-456', content: 'Option 2' },
+        ],
       });
 
       // Mock option exists
@@ -161,6 +165,10 @@ describe('VoteService', () => {
         userId: 'other-user',
         status: 'active',
         expiresAt: new Date(Date.now() + 3600000),
+        options: [
+          { id: 'option-123', content: 'Option 1' },
+          { id: 'option-456', content: 'Option 2' },
+        ],
       });
       (prisma.questionOption.findUnique as jest.Mock).mockResolvedValue({
         id: input.optionId,
@@ -250,10 +258,11 @@ describe('VoteService', () => {
       expect(result[0].optionId).toBe('opt-1');
       expect(result[1].optionId).toBe('opt-2');
 
-      expect(prisma.vote.findMany).toHaveBeenCalledWith({
-        where: { questionId },
-        include: expect.any(Object),
-      });
+      expect(prisma.vote.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { questionId },
+        })
+      );
     });
   });
 

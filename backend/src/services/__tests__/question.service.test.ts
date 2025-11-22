@@ -70,7 +70,11 @@ describe('QuestionService', () => {
       });
 
       // Mock points check
-      (pointsService.canAffordQuestion as jest.Mock).mockResolvedValue(true);
+      (pointsService.canAffordQuestion as jest.Mock).mockResolvedValue({
+        canAfford: true,
+        current: 20,
+        required: 10,
+      });
 
       // Mock question creation
       const mockQuestion = {
@@ -170,7 +174,11 @@ describe('QuestionService', () => {
         points: 20,
       });
 
-      (pointsService.canAffordQuestion as jest.Mock).mockResolvedValue(true);
+      (pointsService.canAffordQuestion as jest.Mock).mockResolvedValue({
+        canAfford: true,
+        current: 20,
+        required: 13,
+      });
 
       const mockQuestion = {
         id: 'question-123',
@@ -250,13 +258,17 @@ describe('QuestionService', () => {
         createdAt: new Date(),
         expiresAt: new Date(Date.now() + 3600000),
         options: [
-          { id: 'opt1', content: 'Option 1', orderIndex: 0, imageUrl: null },
-          { id: 'opt2', content: 'Option 2', orderIndex: 1, imageUrl: null },
+          { id: 'opt1', content: 'Option 1', orderIndex: 0, imageUrl: null, _count: { votes: 5 } },
+          { id: 'opt2', content: 'Option 2', orderIndex: 1, imageUrl: null, _count: { votes: 3 } },
         ],
         user: {
           id: 'creator-123',
           username: 'creator',
         },
+        _count: {
+          votes: 8,
+        },
+        votes: [],
       };
 
       (prisma.question.findUnique as jest.Mock).mockResolvedValue(mockQuestion);
