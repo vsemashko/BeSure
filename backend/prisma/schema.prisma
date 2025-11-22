@@ -287,3 +287,26 @@ model UserChallenge {
   @@index([challengeDate])
   @@map("user_challenges")
 }
+
+// ============================================
+// SUPPORT
+// ============================================
+
+model SupportTicket {
+  id         String   @id @default(uuid())
+  userId     String
+  email      String   @db.VarChar(255)
+  subject    String   @db.VarChar(200)
+  message    String   @db.Text
+  category   String   @db.VarChar(50) // bug, feature, account, billing, other
+  status     String   @default("open") @db.VarChar(20) // open, in_progress, resolved, closed
+  userAgent  String?  @db.Text
+  appVersion String?  @db.VarChar(50)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("support_tickets")
+}

@@ -11,6 +11,7 @@ import leaderboardRoutes from './leaderboard.routes';
 import uploadRoutes from './upload.routes';
 import analyticsRoutes from './analytics.routes';
 import referralRoutes from './referral.routes';
+import supportRoutes from './support.routes';
 
 const router = Router();
 
@@ -39,6 +40,7 @@ router.use('/leaderboard', leaderboardRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/referral', referralRoutes);
+router.use('/support', supportRoutes);
 
 // Future routes:
 // router.use('/users', userRoutes);
