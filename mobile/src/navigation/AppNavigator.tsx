@@ -21,6 +21,7 @@ import { ChangePasswordScreen } from '../screens/ChangePasswordScreen';
 import { FollowersScreen } from '../screens/FollowersScreen';
 import { FollowingScreen } from '../screens/FollowingScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
+import { NotificationPreferencesScreen } from '../screens/NotificationPreferencesScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -142,6 +143,13 @@ export function AppNavigator() {
             <Stack.Screen
               name="Notifications"
               component={NotificationsScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="NotificationPreferences"
+              component={NotificationPreferencesScreen}
               options={{
                 headerShown: false,
               }}

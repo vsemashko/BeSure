@@ -320,6 +320,11 @@ export function ProfileScreen() {
         {/* Actions */}
         <View style={styles.actions}>
           <Button
+            title="Notification Settings"
+            onPress={() => navigation.navigate('NotificationPreferences' as never)}
+            variant="secondary"
+          />
+          <Button
             title="Logout"
             onPress={handleLogout}
             variant="danger"

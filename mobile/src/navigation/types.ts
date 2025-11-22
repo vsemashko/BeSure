@@ -19,6 +19,7 @@ export type RootStackParamList = {
   Followers: { userId: string; username?: string };
   Following: { userId: string; username?: string };
   Notifications: undefined;
+  NotificationPreferences: undefined;
 };
 
 export type MainTabParamList = {
