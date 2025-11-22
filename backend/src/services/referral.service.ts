@@ -1,6 +1,5 @@
 import prisma from '../config/database';
-import config from '../config/constants';
-import { NotFoundError, BadRequestError } from '../utils/errors';
+import { NotFoundError, ValidationError } from '../utils/errors';
 import logger from '../utils/logger';
 import pointsService from './points.service';
 
@@ -99,12 +98,12 @@ class ReferralService {
     });
 
     if (!referrer) {
-      throw new BadRequestError('Invalid referral code');
+      throw new ValidationError('Invalid referral code');
     }
 
     // Check if user is trying to refer themselves
     if (referrer.id === newUserId) {
-      throw new BadRequestError('You cannot use your own referral code');
+      throw new ValidationError('You cannot use your own referral code');
     }
 
     // Check if new user already has a referrer
@@ -114,7 +113,7 @@ class ReferralService {
     });
 
     if (existingUser?.referredBy) {
-      throw new BadRequestError('User has already been referred');
+      throw new ValidationError('User has already been referred');
     }
 
     // Create referral record and update user

@@ -26,6 +26,7 @@ import { SearchScreen } from '../screens/SearchScreen';
 import { TemplatesScreen } from '../screens/TemplatesScreen';
 import { QuestionInsightsScreen } from '../screens/QuestionInsightsScreen';
 import { InviteFriendsScreen } from '../screens/InviteFriendsScreen';
+import { HelpScreen } from '../screens/HelpScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -186,6 +187,13 @@ export function AppNavigator() {
             <Stack.Screen
               name="InviteFriends"
               component={InviteFriendsScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="Help"
+              component={HelpScreen}
               options={{
                 headerShown: false,
               }}

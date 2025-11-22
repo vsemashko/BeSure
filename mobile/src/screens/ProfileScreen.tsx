@@ -341,6 +341,11 @@ export function ProfileScreen() {
         {/* Actions */}
         <View style={styles.actions}>
           <Button
+            title="Help & Support"
+            onPress={() => navigation.navigate('Help' as never)}
+            variant="secondary"
+          />
+          <Button
             title="Notification Settings"
             onPress={() => navigation.navigate('NotificationPreferences' as never)}
             variant="secondary"

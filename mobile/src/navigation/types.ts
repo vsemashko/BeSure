@@ -23,6 +23,7 @@ export type RootStackParamList = {
   Templates: undefined;
   QuestionInsights: { questionId: string };
   InviteFriends: undefined;
+  Help: undefined;
 };
 
 export type MainTabParamList = {

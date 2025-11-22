@@ -10,3 +10,4 @@ export { default as leaderboardApi } from './leaderboard';
 export { uploadApi } from './upload';
 export { default as analyticsApi } from './analytics';
 export { default as referralApi } from './referral';
+export { default as supportApi } from './support';
