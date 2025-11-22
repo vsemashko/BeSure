@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, typography, spacing } from '../theme';
 import { Card } from '../components/Card';
+import notificationService from '../services/notifications';
 import logger from '../utils/logger';
 
 interface NotificationPreference {
@@ -95,9 +96,15 @@ export function NotificationPreferencesScreen() {
     try {
       setIsLoading(true);
 
-      // TODO: Implement API call to fetch preferences
-      // const response = await notificationApi.getPreferences();
-      // setPreferences(response);
+      const backendPrefs = await notificationService.getPreferences();
+
+      // Update preferences state with backend values
+      setPreferences((prev) =>
+        prev.map((pref) => ({
+          ...pref,
+          enabled: backendPrefs[pref.id as keyof typeof backendPrefs] ?? pref.enabled,
+        }))
+      );
 
       logger.logUserAction('view_notification_preferences');
     } catch (error) {
@@ -116,8 +123,8 @@ export function NotificationPreferencesScreen() {
 
       setIsSaving(true);
 
-      // TODO: Implement API call to save preferences
-      // await notificationApi.updatePreferences({ [id]: value });
+      // Save to backend
+      await notificationService.updatePreferences({ [id]: value } as any);
 
       logger.logUserAction('update_notification_preference', {
         preference: id,

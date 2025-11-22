@@ -24,6 +24,8 @@ export interface NotificationPreferences {
   questionExpiring: boolean;
   newVotes: boolean;
   expertiseLevelUp: boolean;
+  socialUpdates: boolean;
+  questionUpdates: boolean;
 }
 
 class NotificationService {
@@ -143,6 +145,8 @@ class NotificationService {
         questionExpiring: true,
         newVotes: true,
         expertiseLevelUp: true,
+        socialUpdates: true,
+        questionUpdates: true,
       };
     }
   }
