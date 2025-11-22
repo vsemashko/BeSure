@@ -14,6 +14,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { QuestionCard } from '../components/QuestionCard';
 import { useAuthStore } from '../store/authStore';
 import { questionApi } from '../api';
+import socialApi from '../api/social';
 import { colors, typography, spacing } from '../theme';
 import logger from '../utils/logger';
 import type { Question, FeedMode } from '../types';
@@ -23,6 +24,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const FEED_MODES: { key: FeedMode; label: string }[] = [
   { key: 'foryou', label: 'For You' },
+  { key: 'friends', label: 'Friends' },
   { key: 'urgent', label: 'Urgent' },
   { key: 'popular', label: 'Popular' },
 ];
@@ -47,11 +49,22 @@ export function FeedScreen() {
         setIsLoading(true);
       }
 
-      const result = await questionApi.getFeed({
-        mode,
-        limit: 20,
-        offset: refresh ? 0 : offset,
-      });
+      let result;
+
+      // Use different API for friends feed
+      if (mode === 'friends') {
+        result = await socialApi.getFriendFeed({
+          limit: 20,
+          offset: refresh ? 0 : offset,
+        });
+        logger.logUserAction('view_friends_feed', { count: result.questions.length });
+      } else {
+        result = await questionApi.getFeed({
+          mode,
+          limit: 20,
+          offset: refresh ? 0 : offset,
+        });
+      }
 
       if (refresh) {
         setQuestions(result.questions);
@@ -123,15 +136,30 @@ export function FeedScreen() {
     </View>
   );
 
-  const renderEmpty = () => (
-    <View style={styles.emptyContainer}>
-      <Text style={styles.emptyEmoji}>🤔</Text>
-      <Text style={styles.emptyTitle}>No questions yet</Text>
-      <Text style={styles.emptyText}>
-        Be the first to ask a question or check back later!
-      </Text>
-    </View>
-  );
+  const renderEmpty = () => {
+    if (selectedMode === 'friends') {
+      return (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyEmoji}>👥</Text>
+          <Text style={styles.emptyTitle}>No Friend Activity</Text>
+          <Text style={styles.emptyText}>
+            Follow people to see their questions here!{'\n'}
+            Check out the Popular tab to find interesting people.
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyEmoji}>🤔</Text>
+        <Text style={styles.emptyTitle}>No questions yet</Text>
+        <Text style={styles.emptyText}>
+          Be the first to ask a question or check back later!
+        </Text>
+      </View>
+    );
+  };
 
   const renderFooter = () => {
     if (!isLoading || isRefreshing) return null;

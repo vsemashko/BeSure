@@ -106,7 +106,7 @@ export interface PaginatedResponse<T> {
 }
 
 // Feed modes
-export type FeedMode = 'urgent' | 'popular' | 'foryou';
+export type FeedMode = 'urgent' | 'popular' | 'foryou' | 'friends';
 
 // Create question input
 export interface CreateQuestionInput {
